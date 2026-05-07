@@ -1,0 +1,12 @@
+<h1>{{.Topic.Title}}</h1>
+<p>{{.Topic.Content}}</p>
+
+{{if eq .Topic.Status "fermé"}}
+    <p><strong>Ce topic est fermé. Les réponses sont désactivées.</strong></p>
+{{else}}
+    <form action="/message/post" method="POST">
+        <input type="hidden" name="topic_id" value="{{.Topic.ID}}">
+        <textarea name="content" placeholder="Votre message..." required></textarea>
+        <button type="submit">Envoyer</button>
+    </form>
+{{end}}
