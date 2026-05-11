@@ -1,11 +1,20 @@
-{{ define "content" }}
-<div class="container">
-    <h1>Créer un nouveau sujet</h1>
-    <form action="/topic/create" method="POST">
+{{define "content"}}
+<link rel="stylesheet" href="/static/css/styles_login.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<form method="POST" action="/topic/create" style="max-width: 500px; margin: 50px auto;">
+    <h1>NOUVEAU SUJET</h1>
+
+    <div class="input-group">
+        <i class="fa-solid fa-heading icon"></i>
         <input type="text" name="title" placeholder="Titre du topic" required>
-        <textarea name="content" placeholder="Contenu de votre message" required></textarea>
-        <input type="text" name="tags" placeholder="Tags (ex: go, sql, aide)">
-        <button type="submit">Publier le topic</button>
-    </form>
-</div>
-{{ end }}
+    </div>
+
+    <div class="input-group" style="height: auto;">
+        <textarea name="content" placeholder="Contenu de votre message..." rows="6" 
+                  style="border: none; background: transparent; width: 100%; padding: 10px; outline: none;"></textarea>
+    </div>
+
+    <button type="submit">Publier</button>
+    <a href="/" style="display: block; text-align: center; margin-top: 15px; color: white; text-decoration: none; opacity: 0.7;">Annuler</a>
+</form>
+{{end}}

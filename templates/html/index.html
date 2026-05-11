@@ -1,7 +1,24 @@
-{{ define "content" }}
-<h2>Derniers Topics</h2>
-<div class="topics-list">
-    <p>Bienvenue sur le forum.</p>
-    <a href="/topic/create" class="btn">Créer un Topic</a>
+{{define "content"}}
+<link rel="stylesheet" href="/static/css/forum.css">
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1>Derniers Topics</h1>
+        <a href="/topic/create" class="btn-main">+ Créer un sujet</a>
+    </div>
+
+    <div class="topics-list">
+        {{range .}}
+        <div class="topic-card">
+            <h3>{{.Title}}</h3>
+            <p>{{.Content}}</p>
+            <div style="font-size: 0.8rem; opacity: 0.6; margin-top: 10px;">
+                <i class="fa-regular fa-clock"></i> {{.Date}}
+            </div>
+        </div>
+        {{else}}
+        <p style="text-align: center; opacity: 0.5;">Aucun sujet pour le moment...</p>
+        {{end}}
+    </div>
 </div>
-{{ end }}
+{{end}}
