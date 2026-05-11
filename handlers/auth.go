@@ -18,8 +18,8 @@ type TemplateData struct {
 func RenderTemplate(w http.ResponseWriter, tmpl string, data any) {
 
 	t, err := template.ParseFiles(
-		"templates/layout.html",
-		"templates/"+tmpl,
+		"templates/html/layout.html",
+		"templates/html/"+tmpl,
 	)
 
 	if err != nil {
