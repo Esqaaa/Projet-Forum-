@@ -1,0 +1,108 @@
+/* --- GLOBAL --- */
+body {
+    margin: 0;
+    padding: 0;
+    font-family:Verdana;
+    font-size: 10%;
+    background: #272757;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+/* --- CONTENEUR FORMULAIRE --- */
+form {
+    background: rgba(90, 120, 255, 0.20);
+    padding: 65px;
+    border-radius: 16px;
+
+    backdrop-filter: blur(8px);
+
+    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+
+    width: 420px;
+
+    border: 1px solid rgba(150, 170, 255, 0.25);
+
+    box-sizing: border-box;
+}
+
+/* --- TITRE --- */
+h1 {
+    text-align: center;
+    margin-bottom: 35px;
+    font-family: Impact, sans-serif;
+    font-weight: 40;
+    font-size: 40px;
+}
+
+/* --- INPUT GROUP --- */
+.input-group {
+    position: relative;
+    width: 100%;
+    margin-bottom: 22px;
+}
+
+/* --- ICÔNES --- */
+.input-group .icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #5a78ff;
+    font-size: 18px;
+    pointer-events: none;
+}
+
+/* --- INPUTS --- */
+.input-group input {
+    width: 100%;
+    padding: 15px 18px 15px 50px;
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    outline: none;
+    background: rgba(255,255,255,0.92);
+    box-sizing: border-box;
+}
+
+.input-group input:focus {
+    background: white;
+    box-shadow: 0 0 0 2px #5a78ff;
+}
+
+/* --- BOUTON --- */
+button {
+    width: 100%;
+    padding: 15px;
+    margin-top: 15px;
+    background: #5a78ff;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    box-sizing: border-box;
+}
+
+button:hover {
+    background: #3f5fff;
+}
+
+/* --- LIENS --- */
+a {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    color: #dce6ff;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+a:hover {
+    text-decoration: underline;
+}

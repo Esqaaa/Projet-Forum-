@@ -1,0 +1,28 @@
+{{define "content"}}
+
+<link rel="stylesheet" href="../static/css/styles_login.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<form method="POST" action="/login">
+
+    <h1>INSCRIPTION</h1>
+
+    <div class="input-group">
+        <i class="fa-solid fa-user icon"></i>
+        <input type="text" name="identifier" placeholder="Pseudo ou email" required>
+    </div>
+    
+    <div class="input-group">
+        <i class="fa-solid fa-lock icon"></i>
+        <input type="password" name="password" placeholder="Mot de passe" required>
+    </div>
+
+    <button type="submit">Inscription</button>
+
+    <a href="/login">J'ai déjà un compte</a>
+
+</form>
+
+
+
+{{end}}
