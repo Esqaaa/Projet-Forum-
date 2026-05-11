@@ -11,18 +11,22 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func RenderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
+func RenderTemplate(w http.ResponseWriter, tmpl string, data any) {
 	t, err := template.ParseFiles(
-		"templates/html/layout.html",
-		"templates/html/"+tmpl,
+		"templates/layout.html",
+		"templates/"+tmpl,
 	)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), 500)
 		return
 	}
 
-	t.ExecuteTemplate(w, "layout", data)
+	err = t.ExecuteTemplate(w, "layout", data)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -32,60 +36,64 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	r.ParseForm()
+
 	username := r.FormValue("username")
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	// Validation pseudo
+	// Validation username
 	usernameRegex := regexp.MustCompile(`^[a-zA-Z0-9]+$`)
 	if !usernameRegex.MatchString(username) {
 		http.Error(w, "Pseudo invalide", http.StatusBadRequest)
 		return
 	}
 
-	// Validation password
-	err := ValidatePassword(password)
-	if err != nil {
+	// Password rules
+	if err := ValidatePassword(password); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Vérifie username unique
-	var exists int
-
-	err = database.DB.QueryRow(
+	// CHECK USERNAME EXIST
+	var tmp int
+	err := database.DB.QueryRow(
 		"SELECT id FROM users WHERE username = ?",
 		username,
-	).Scan(&exists)
+	).Scan(&tmp)
 
-	if err != sql.ErrNoRows {
+	if err == nil {
 		http.Error(w, "Pseudo déjà utilisé", http.StatusBadRequest)
 		return
 	}
+	if err != sql.ErrNoRows {
+		http.Error(w, "Erreur serveur DB", http.StatusInternalServerError)
+		return
+	}
 
-	// Vérifie email unique
+	// CHECK EMAIL EXIST
 	err = database.DB.QueryRow(
 		"SELECT id FROM users WHERE email = ?",
 		email,
-	).Scan(&exists)
+	).Scan(&tmp)
 
-	if err != sql.ErrNoRows {
+	if err == nil {
 		http.Error(w, "Email déjà utilisé", http.StatusBadRequest)
 		return
 	}
-
-	// Hash password
-	hashedPassword, err := bcrypt.GenerateFromPassword(
-		[]byte(password),
-		bcrypt.DefaultCost,
-	)
-
-	if err != nil {
-		http.Error(w, "Erreur serveur", http.StatusInternalServerError)
+	if err != sql.ErrNoRows {
+		http.Error(w, "Erreur serveur DB", http.StatusInternalServerError)
 		return
 	}
 
-	// Insert user
+	// HASH PASSWORD
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, "Erreur hash password", http.StatusInternalServerError)
+		return
+	}
+
+	// INSERT USER
 	_, err = database.DB.Exec(
 		"INSERT INTO users(username, email, password) VALUES (?, ?, ?)",
 		username,
@@ -94,7 +102,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(w, "Erreur insertion", http.StatusInternalServerError)
+		http.Error(w, "Erreur insertion utilisateur", http.StatusInternalServerError)
 		return
 	}
 
@@ -108,57 +116,48 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	r.ParseForm()
+
 	identifier := r.FormValue("identifier")
 	password := r.FormValue("password")
 
 	var id int
-	var hashedPassword string
+	var hashed string
 
 	err := database.DB.QueryRow(
-		`SELECT id, password
-		FROM users
-		WHERE username = ? OR email = ?`,
+		`SELECT id, password FROM users WHERE username = ? OR email = ?`,
 		identifier,
 		identifier,
-	).Scan(&id, &hashedPassword)
+	).Scan(&id, &hashed)
 
 	if err != nil {
 		http.Error(w, "Identifiants invalides", http.StatusUnauthorized)
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword(
-		[]byte(hashedPassword),
-		[]byte(password),
-	)
-
+	err = bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
 	if err != nil {
 		http.Error(w, "Mot de passe incorrect", http.StatusUnauthorized)
 		return
 	}
 
-	// Cookie session simple
-	cookie := &http.Cookie{
+	http.SetCookie(w, &http.Cookie{
 		Name:  "session",
 		Value: identifier,
 		Path:  "/",
-	}
-
-	http.SetCookie(w, cookie)
+	})
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
-	cookie := &http.Cookie{
+	http.SetCookie(w, &http.Cookie{
 		Name:   "session",
 		Value:  "",
 		Path:   "/",
 		MaxAge: -1,
-	}
-
-	http.SetCookie(w, cookie)
+	})
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
@@ -166,18 +165,17 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 func ValidatePassword(password string) error {
 
 	if len(password) < 8 {
-		return errors.New("Le mot de passe doit faire 8 caractères minimum")
+		return errors.New("8 caractères minimum")
 	}
 
-	uppercase := regexp.MustCompile(`[A-Z]`)
-	if !uppercase.MatchString(password) {
-		return errors.New("Le mot de passe doit contenir une majuscule")
+	if ok, _ := regexp.MatchString(`[A-Z]`, password); !ok {
+		return errors.New("1 majuscule requise")
 	}
 
-	special := regexp.MustCompile(`[!@#$%^&*(),.?":{}|<>]`)
-	if !special.MatchString(password) {
-		return errors.New("Le mot de passe doit contenir un caractère spécial")
+	if ok, _ := regexp.MatchString(`[!@#$%^&*(),.?":{}|<>]`, password); !ok {
+		return errors.New("1 caractère spécial requis")
 	}
 
 	return nil
 }
+

@@ -1,4 +1,4 @@
-CREATE DATABASE iF NOT EXISTS forum_project;
+CREATE DATABASE IF NOT EXISTS forum_project;
 USE forum_project;
 
 CREATE TABLE users (
@@ -6,7 +6,7 @@ CREATE TABLE users (
 
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(30) NOT NULL,
+    password VARCHAR(255) NOT NULL,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
