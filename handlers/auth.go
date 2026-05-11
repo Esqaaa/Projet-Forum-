@@ -36,7 +36,7 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, data any) {
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
-	// AFFICHAGE PAGE
+	// AFFICHAGE
 	if r.Method == "GET" {
 		RenderTemplate(w, "register.html", nil)
 		return
@@ -67,7 +67,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// CHECK USERNAME EXIST
+	// VERIF USERNAME EXISTE
 	var tmp int
 
 	err := database.DB.QueryRow(
@@ -91,7 +91,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// CHECK EMAIL EXIST
+	// VERIF EMAIL EXISTE
 	err = database.DB.QueryRow(
 		"SELECT id FROM users WHERE email = ?",
 		email,
@@ -127,7 +127,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// INSERT USER
+	// INSERT USER DANS TABLE 
 	_, err = database.DB.Exec(
 		"INSERT INTO users(username, email, password) VALUES (?, ?, ?)",
 		username,

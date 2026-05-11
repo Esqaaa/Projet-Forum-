@@ -27,5 +27,5 @@ func InitDB() {
 	DB.SetMaxOpenConns(10)
 	DB.SetMaxIdleConns(5)
 
-	log.Println("✔️ Connecté à MySQL")
+	log.Println("[!] Connecté à MySQL")
 }

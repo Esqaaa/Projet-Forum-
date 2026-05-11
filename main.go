@@ -25,6 +25,7 @@ func main() {
 		fmt.Fprintln(w, "Accueil du forum")
 	})
 
+	fmt.Println("[!] Serveur démarré avec succès")
 	fmt.Println("Serveur lancé sur http://localhost:8080/register")
 	http.ListenAndServe(":8080", nil)
 }
