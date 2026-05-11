@@ -23,4 +23,10 @@
 
 </form>
 
+{{if .Error}}
+<div class="popup-error">
+    {{.Error}}
+</div>
+{{end}}
+
 {{end}}

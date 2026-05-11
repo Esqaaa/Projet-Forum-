@@ -11,7 +11,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type TemplateData struct {
+	Error string
+}
+
 func RenderTemplate(w http.ResponseWriter, tmpl string, data any) {
+
 	t, err := template.ParseFiles(
 		"templates/layout.html",
 		"templates/"+tmpl,
@@ -31,6 +36,7 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, data any) {
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
+	// AFFICHAGE PAGE
 	if r.Method == "GET" {
 		RenderTemplate(w, "register.html", nil)
 		return
@@ -42,32 +48,46 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	// Validation username
+	// VALIDATION USERNAME
 	usernameRegex := regexp.MustCompile(`^[a-zA-Z0-9]+$`)
+
 	if !usernameRegex.MatchString(username) {
-		http.Error(w, "Pseudo invalide", http.StatusBadRequest)
+		RenderTemplate(w, "register.html", TemplateData{
+			Error: "Pseudo invalide",
+		})
 		return
 	}
 
-	// Password rules
+	// VALIDATION PASSWORD
 	if err := ValidatePassword(password); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+
+		RenderTemplate(w, "register.html", TemplateData{
+			Error: err.Error(),
+		})
 		return
 	}
 
 	// CHECK USERNAME EXIST
 	var tmp int
+
 	err := database.DB.QueryRow(
 		"SELECT id FROM users WHERE username = ?",
 		username,
 	).Scan(&tmp)
 
 	if err == nil {
-		http.Error(w, "Pseudo déjà utilisé", http.StatusBadRequest)
+
+		RenderTemplate(w, "register.html", TemplateData{
+			Error: "Pseudo déjà utilisé",
+		})
 		return
 	}
+
 	if err != sql.ErrNoRows {
-		http.Error(w, "Erreur serveur DB", http.StatusInternalServerError)
+
+		RenderTemplate(w, "register.html", TemplateData{
+			Error: "Erreur serveur DB",
+		})
 		return
 	}
 
@@ -78,18 +98,32 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	).Scan(&tmp)
 
 	if err == nil {
-		http.Error(w, "Email déjà utilisé", http.StatusBadRequest)
+
+		RenderTemplate(w, "register.html", TemplateData{
+			Error: "Email déjà utilisé",
+		})
 		return
 	}
+
 	if err != sql.ErrNoRows {
-		http.Error(w, "Erreur serveur DB", http.StatusInternalServerError)
+
+		RenderTemplate(w, "register.html", TemplateData{
+			Error: "Erreur serveur DB",
+		})
 		return
 	}
 
 	// HASH PASSWORD
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(password),
+		bcrypt.DefaultCost,
+	)
+
 	if err != nil {
-		http.Error(w, "Erreur hash password", http.StatusInternalServerError)
+
+		RenderTemplate(w, "register.html", TemplateData{
+			Error: "Erreur hash password",
+		})
 		return
 	}
 
@@ -102,15 +136,20 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		http.Error(w, "Erreur insertion utilisateur", http.StatusInternalServerError)
+
+		RenderTemplate(w, "register.html", TemplateData{
+			Error: "Erreur insertion utilisateur",
+		})
 		return
 	}
 
+	// REDIRECTION LOGIN
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
+	// AFFICHAGE PAGE
 	if r.Method == "GET" {
 		RenderTemplate(w, "login.html", nil)
 		return
@@ -124,6 +163,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var id int
 	var hashed string
 
+	// RECHERCHE USER
 	err := database.DB.QueryRow(
 		`SELECT id, password FROM users WHERE username = ? OR email = ?`,
 		identifier,
@@ -131,22 +171,35 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	).Scan(&id, &hashed)
 
 	if err != nil {
-		http.Error(w, "Identifiants invalides", http.StatusUnauthorized)
+
+		RenderTemplate(w, "login.html", TemplateData{
+			Error: "Identifiants invalides",
+		})
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
+	// CHECK PASSWORD
+	err = bcrypt.CompareHashAndPassword(
+		[]byte(hashed),
+		[]byte(password),
+	)
+
 	if err != nil {
-		http.Error(w, "Mot de passe incorrect", http.StatusUnauthorized)
+
+		RenderTemplate(w, "login.html", TemplateData{
+			Error: "Mot de passe incorrect",
+		})
 		return
 	}
 
+	// COOKIE SESSION
 	http.SetCookie(w, &http.Cookie{
 		Name:  "session",
 		Value: identifier,
 		Path:  "/",
 	})
 
+	// REDIRECTION ACCUEIL
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -178,4 +231,3 @@ func ValidatePassword(password string) error {
 
 	return nil
 }
-
