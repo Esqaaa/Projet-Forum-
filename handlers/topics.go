@@ -1,39 +1,54 @@
 package handlers
 
 import (
-	"database/sql"
+	"forum/database"
 	"net/http"
-	"time"
 )
 
-// FT-3 : Création d'un topic
-func CreateTopicHandler(db *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.ServeFile(w, r, "./templates/html/create_topic.html")
-			return
-		}
+// getLoggedUserID : Traduit le cookie de ton pote en ID utilisateur
+func getLoggedUserID(r *http.Request) int {
+	cookie, err := r.Cookie("session") // Nom exact utilisé dans auth.go
+	if err != nil {
+		return 0
+	}
 
-		// Récupérer les données du formulaire
+	var userID int
+	// On cherche l'ID qui correspond au pseudo/email stocké dans le cookie
+	query := "SELECT id FROM users WHERE username = ? OR email = ?"
+	err = database.DB.QueryRow(query, cookie.Value, cookie.Value).Scan(&userID)
+	if err != nil {
+		return 0
+	}
+	return userID
+}
+
+func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
+	userID := getLoggedUserID(r)
+	if userID == 0 {
+		// Si pas de cookie valide, on renvoie au login
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if r.Method == http.MethodGet {
+		RenderTemplate(w, "create_topic.html", nil)
+		return
+	}
+
+	if r.Method == http.MethodPost {
 		title := r.FormValue("title")
 		content := r.FormValue("content")
 		tags := r.FormValue("tags")
 
-		// Remplacer le 1 par l'ID de l'utilisateur connecté (ex: depuis la session)
-		// Normalement dans la fonction de session, on aurait une fonction GetUserIDFromSession(r) qui retourne l'ID de l'utilisateur connecté
-		authorID := 1 
-
-		// Insertion en base de données
-		_, err := db.Exec(`INSERT INTO topics (title, content, tags, author_id, status, created_at) 
-						   VALUES (?, ?, ?, ?, 'ouvert', ?)`,
-			title, content, tags, authorID, time.Now())
-
+		_, err := database.DB.Exec(
+			"INSERT INTO topics (title, content, tags, author_id) VALUES (?, ?, ?, ?)",
+			title, content, tags, userID,
+		)
 		if err != nil {
-			http.Error(w, "Erreur lors de la création du topic", http.StatusInternalServerError)
+			http.Error(w, "Erreur lors de la création : "+err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		// Redirection vers l'accueil ou le topic
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }

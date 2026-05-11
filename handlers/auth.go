@@ -13,8 +13,8 @@ import (
 
 func RenderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
 	t, err := template.ParseFiles(
-		"templates/layout.html",
-		"templates/"+tmpl,
+		"templates/html/layout.html",
+		"templates/html/"+tmpl,
 	)
 
 	if err != nil {

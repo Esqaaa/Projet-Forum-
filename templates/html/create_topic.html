@@ -1,6 +1,11 @@
-<form action="/topic/create" method="POST">
-    <label>Titre :</label>
-    <input type="text" name="title" required> <label>Message :</label>
-    <textarea name="content" required></textarea> <label>Tags :</label>
-    <input type="text" name="tags"> <button type="submit">Publier le topic</button>
-</form>
+{{ define "content" }}
+<div class="container">
+    <h1>Créer un nouveau sujet</h1>
+    <form action="/topic/create" method="POST">
+        <input type="text" name="title" placeholder="Titre du topic" required>
+        <textarea name="content" placeholder="Contenu de votre message" required></textarea>
+        <input type="text" name="tags" placeholder="Tags (ex: go, sql, aide)">
+        <button type="submit">Publier le topic</button>
+    </form>
+</div>
+{{ end }}
