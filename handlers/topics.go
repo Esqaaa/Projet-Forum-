@@ -39,7 +39,7 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 		title := r.FormValue("title")
 		content := r.FormValue("content")
 		
-		// INSERT sans image_url
+		// INSERT sans image (pour le moment)
 		_, err := database.DB.Exec(
 			"INSERT INTO topics (title, content, author_id, status) VALUES (?, ?, ?, ?)",
 			title, content, userID, "ouvert",
@@ -53,62 +53,134 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
-	topicID := r.URL.Query().Get("id")
+    topicID := r.URL.Query().Get("id")
 
-	var t models.Topic
-	var rawDate []byte
+    var t models.Topic
+    var rawDate []byte
 
-	// 1. SELECT corrigé : On a enlevé t.image_url ici
-	query := `
-		SELECT t.id, t.title, t.content, t.status, t.created_at, u.username 
-		FROM topics t 
-		JOIN users u ON t.author_id = u.id 
-		WHERE t.id = ?`
-	
-	// 2. SCAN corrigé : L'ordre doit être identique au SELECT ci-dessus
-	err := database.DB.QueryRow(query, topicID).Scan(
-		&t.ID, 
-		&t.Title, 
-		&t.Content, 
-		&t.Status, 
-		&rawDate, 
-		&t.Author,
-	)
+    // 1. On ajoute t.author_id dans le SELECT
+    query := `
+        SELECT t.id, t.title, t.content, t.status, t.created_at, u.username, t.author_id 
+        FROM topics t 
+        JOIN users u ON t.author_id = u.id 
+        WHERE t.id = ?`
+    
+    // 2. On ajoute &t.AuthorID dans le Scan
+    err := database.DB.QueryRow(query, topicID).Scan(
+        &t.ID, 
+        &t.Title, 
+        &t.Content, 
+        &t.Status, 
+        &rawDate, 
+        &t.Author,
+        &t.AuthorID,
+    )
 
-	if err != nil {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	// On remplit les deux champs de ton modèle pour être sûr
-	t.CreatedAt = string(rawDate)
-	t.Date = string(rawDate)
+    if err != nil {
+        http.Redirect(w, r, "/", http.StatusSeeOther)
+        return
+    }
+    t.CreatedAt = string(rawDate)
+    t.Date = string(rawDate)
 
-	// 3. Récupération des commentaires (messages)
-	rows, err := database.DB.Query(`
-		SELECT m.content, m.created_at, u.username 
-		FROM messages m 
-		JOIN users u ON m.author_id = u.id 
-		WHERE m.topic_id = ? 
-		ORDER BY m.created_at ASC`, topicID)
-	
-	if err != nil {
-		// On continue même s'il n'y a pas de commentaires
-	} else {
-		defer rows.Close()
-	}
-	
-	var comments []models.Comment
-	for rows != nil && rows.Next() {
-		var c models.Comment
-		var cDate []byte
-		rows.Scan(&c.Content, &cDate, &c.Author)
-		c.Date = string(cDate)
-		comments = append(comments, c)
-	}
+    // 3. On récupère aussi l'ID du message pour pouvoir le supprimer (FT-06)
+    rows, err := database.DB.Query(`
+        SELECT m.id, m.content, m.created_at, u.username 
+        FROM messages m 
+        JOIN users u ON m.author_id = u.id 
+        WHERE m.topic_id = ? 
+        ORDER BY m.created_at ASC`, topicID)
+    
+    if err == nil {
+        defer rows.Close()
+    }
+    
+    var comments []models.Comment
+    for rows != nil && rows.Next() {
+        var c models.Comment
+        var cDate []byte
+        // On scanne l'ID du message ici
+        rows.Scan(&c.ID, &c.Content, &cDate, &c.Author)
+        c.Date = string(cDate)
+        comments = append(comments, c)
+    }
 
-	data := map[string]interface{}{
-		"Topic":    t,
-		"Comments": comments,
-	}
-	RenderTemplate(w, "view_topic.html", data)
+    data := map[string]interface{}{
+        "Topic":         t,
+        "Comments":      comments,
+        "CurrentUserID": getLoggedUserID(r),
+    }
+    RenderTemplate(w, "view_topic.html", data)
+}
+
+func PostMessageHandler(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPost {
+        http.Redirect(w, r, "/", http.StatusSeeOther)
+        return
+    }
+
+    userID := getLoggedUserID(r)
+    if userID == 0 {
+        http.Redirect(w, r, "/login", http.StatusSeeOther)
+        return
+    }
+
+    topicID := r.FormValue("topic_id")
+    content := r.FormValue("content")
+
+    if content != "" {
+        _, err := database.DB.Exec(
+            "INSERT INTO messages (topic_id, author_id, content) VALUES (?, ?, ?)",
+            topicID, userID, content,
+        )
+        if err != nil {
+            http.Error(w, "Erreur lors de l'envoi du message : "+err.Error(), 500)
+            return
+        }
+    }
+
+    http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+}
+
+
+// DeleteTopicHandler supprime un topic et ses messages (grâce au ON DELETE CASCADE en SQL)
+func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
+    userID := getLoggedUserID(r)
+    topicID := r.URL.Query().Get("id")
+
+    // 1. Vérifier que c'est bien l'auteur qui demande la suppression
+    var authorID int
+    err := database.DB.QueryRow("SELECT author_id FROM topics WHERE id = ?", topicID).Scan(&authorID)
+    
+    if err != nil || userID != authorID {
+        http.Error(w, "Action non autorisée", http.StatusForbidden)
+        return
+    }
+
+    // 2. Supprimer (Le ON DELETE CASCADE dans la BDD s'occupera des messages)
+    database.DB.Exec("DELETE FROM topics WHERE id = ?", topicID)
+
+    http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// DeleteMessageHandler permet au proprio du topic de supprimer un message
+func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
+    userID := getLoggedUserID(r)
+    messageID := r.URL.Query().Get("id")
+    topicID := r.URL.Query().Get("topic_id")
+
+    // Vérifier si l'user est le proprio du TOPIC
+    var topicAuthorID int
+    query := `SELECT t.author_id FROM topics t 
+              JOIN messages m ON t.id = m.topic_id 
+              WHERE m.id = ?`
+    err := database.DB.QueryRow(query, messageID).Scan(&topicAuthorID)
+
+    if err != nil || userID != topicAuthorID {
+        http.Error(w, "Action non autorisée", http.StatusForbidden)
+        return
+    }
+
+    database.DB.Exec("DELETE FROM messages WHERE id = ?", messageID)
+    http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
 }

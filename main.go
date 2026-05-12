@@ -17,7 +17,10 @@ func main() {
 	http.HandleFunc("/login", handlers.LoginHandler)
 	http.HandleFunc("/logout", handlers.LogoutHandler)
 	http.HandleFunc("/topic/create", handlers.CreateTopicHandler)
-	http.HandleFunc("/topic/view", handlers.ViewTopicHandler) // Ajout de la route manquante
+	http.HandleFunc("/topic/view", handlers.ViewTopicHandler)
+	http.HandleFunc("/message/post", handlers.PostMessageHandler)
+	http.HandleFunc("/topic/delete", handlers.DeleteTopicHandler)
+	http.HandleFunc("/message/delete", handlers.DeleteMessageHandler)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Requête SQL sans image_url, avec jointure pour le pseudo

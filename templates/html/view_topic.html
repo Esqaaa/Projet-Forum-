@@ -3,14 +3,26 @@
 
 <div class="container">
     <div class="glass-card" style="padding: 40px; text-align: left;">
-        <a href="/" style="color: #6384ff; text-decoration: none; font-size: 0.9rem;">← Retour à l'accueil</a>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="/" style="color: #6384ff; text-decoration: none; font-size: 0.9rem;">← Retour à l'accueil</a>
+            
+            {{if eq .CurrentUserID .Topic.AuthorID}}
+            <a href="/topic/delete?id={{.Topic.ID}}" 
+               onclick="return confirm('Es-tu sûr de vouloir supprimer ce topic et tous ses messages ?')"
+               style="color: #ff6363; text-decoration: none; font-size: 0.8rem; padding: 5px 10px; border: 1px solid #ff6363; border-radius: 5px;">
+                <i class="fa-solid fa-trash"></i> Supprimer le topic
+            </a>
+            {{end}}
+        </div>
         
         <h1 style="margin-top: 25px; color: #bc84ee;">{{.Topic.Title}}</h1>
         
         <div style="display: flex; gap: 15px; font-size: 0.8rem; opacity: 0.5; margin-bottom: 30px;">
             <span>Par <strong>{{.Topic.Author}}</strong></span>
             <span>•</span>
-            <span>Statut : {{.Topic.Status}}</span>
+            <span>Le {{.Topic.CreatedAt}}</span>
+            <span>•</span>
+            <span style="text-transform: capitalize;">Statut : {{.Topic.Status}}</span>
         </div>
         
         <div style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 40px; white-space: pre-wrap;">
@@ -18,17 +30,41 @@
         </div>
 
         <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;">
-            <h3 style="margin-bottom: 20px;">Répondre au sujet</h3>
+            <h3 style="margin-bottom: 25px;">Commentaires</h3>
+            
+            {{range .Comments}}
+                <div style="background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.05); position: relative;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.6; margin-bottom: 10px;">
+                        <div>
+                            <strong>{{.Author}}</strong> 
+                            <span style="margin-left: 10px;">{{.Date}}</span>
+                        </div>
+
+                        {{if eq $.CurrentUserID $.Topic.AuthorID}}
+                        <a href="/message/delete?id={{.ID}}&topic_id={{$.Topic.ID}}" 
+                           onclick="return confirm('Supprimer ce message ?')"
+                           style="color: #ff6363; text-decoration: none; font-weight: bold;" title="Supprimer le message">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                        {{end}}
+                    </div>
+                    <div style="line-height: 1.5; white-space: pre-wrap;">{{.Content}}</div>
+                </div>
+            {{else}}
+                <p style="opacity: 0.5; font-style: italic; margin-bottom: 30px;">Aucun message pour le moment...</p>
+            {{end}}
+
+            <h3 style="margin-top: 40px; margin-bottom: 20px;">Répondre au sujet</h3>
             
             {{if eq .Topic.Status "fermé"}}
                 <div style="background: rgba(255, 99, 99, 0.1); color: #ff6363; padding: 15px; border-radius: 8px; border: 1px solid rgba(255, 99, 99, 0.2);">
-                    <strong>Ce topic est fermé.</strong> Les réponses sont désactivées.
+                    <strong>🚫 Topic fermé.</strong> Les réponses sont désactivées.
                 </div>
             {{else}}
                 <form action="/message/post" method="POST">
                     <input type="hidden" name="topic_id" value="{{.Topic.ID}}">
                     <textarea name="content" placeholder="Écrivez votre message ici..." required 
-                        style="width: 100%; height: 120px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 15px; border-radius: 8px; font-family: inherit; margin-bottom: 15px;"></textarea>
+                        style="width: 100%; height: 120px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 15px; border-radius: 8px; font-family: inherit; margin-bottom: 15px; resize: none;"></textarea>
                     <button type="submit" class="btn-main">Envoyer le message</button>
                 </form>
             {{end}}
