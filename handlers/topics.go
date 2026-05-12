@@ -10,7 +10,8 @@ import (
     "time"
 )
 
-func getLoggedUserID(r *http.Request) int {
+// GetLoggedUserID : Récupère l'ID via le cookie "session"
+func GetLoggedUserID(r *http.Request) int {
 	cookie, err := r.Cookie("session")
 	if err != nil {
 		return 0
@@ -26,7 +27,7 @@ func getLoggedUserID(r *http.Request) int {
 }
 
 func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
-	userID := getLoggedUserID(r)
+	userID := GetLoggedUserID(r)
 	if userID == 0 {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -148,7 +149,7 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     data := map[string]interface{}{
         "Topic":         t,
         "Comments":      comments,
-        "CurrentUserID": getLoggedUserID(r),
+        "CurrentUserID": GetLoggedUserID(r),
     }
     RenderTemplate(w, "view_topic.html", data)
 }
@@ -159,7 +160,7 @@ func PostMessageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    userID := getLoggedUserID(r)
+    userID := GetLoggedUserID(r)
     if userID == 0 {
         http.Redirect(w, r, "/login", http.StatusSeeOther)
         return
@@ -185,7 +186,7 @@ func PostMessageHandler(w http.ResponseWriter, r *http.Request) {
 
 // DeleteTopicHandler supprime un topic et ses messages (grâce au ON DELETE CASCADE en SQL)
 func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
-    userID := getLoggedUserID(r)
+    userID := GetLoggedUserID(r)
     topicID := r.URL.Query().Get("id")
     var authorID int
     
@@ -202,7 +203,7 @@ func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
 
 // DeleteMessageHandler permet au proprio du topic de supprimer un message
 func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
-    userID := getLoggedUserID(r)
+    userID := GetLoggedUserID(r)
     messageID := r.URL.Query().Get("id")
     topicID := r.URL.Query().Get("topic_id")
 
@@ -222,23 +223,33 @@ func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
     http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
 }
 
-// Ajouter un topic aux favoris 
-func PinTopicHandler(w http.ResponseWriter, r *http.Request) {
-	userID := getLoggedUserID(r)
-	topicID := r.URL.Query().Get("id")
+func UpdateTopicStatusHandler(w http.ResponseWriter, r *http.Request) {
+    userID := GetLoggedUserID(r)
+    topicID := r.URL.Query().Get("id")
+    newStatus := r.URL.Query().Get("status") // On récupère le statut souhaité : ouvert, fermé ou archivé
 
-	// Si l'utilisateur n'est pas connecté, on redirige
-	if userID == 0 {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
+    // Vérification de sécurité (Propriétaire ?)
+    var authorID int
+    err := database.DB.QueryRow("SELECT author_id FROM topics WHERE id = ?", topicID).Scan(&authorID)
+    
+    if err != nil || userID != authorID {
+        http.Error(w, "Action non autorisée", http.StatusForbidden)
+        return
+    }
 
-	_, err := database.DB.Exec("UPDATE topics SET is_pinned = NOT is_pinned WHERE id = ?", topicID)
-	if err != nil {
-		fmt.Println("Erreur SQL Pin:", err)
-		http.Error(w, "Erreur lors de l'épinglage", 500)
-		return
-	}
+    // Validation du statut pour éviter n'importe quoi en BDD
+    validStatuses := map[string]bool{"ouvert": true, "fermé": true, "archivé": true}
+    if !validStatuses[newStatus] {
+        http.Error(w, "Statut invalide", http.StatusBadRequest)
+        return
+    }
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+    // Mise à jour
+    _, err = database.DB.Exec("UPDATE topics SET status = ? WHERE id = ?", newStatus, topicID)
+    if err != nil {
+        http.Error(w, "Erreur BDD", 500)
+        return
+    }
+
+    http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
 }
