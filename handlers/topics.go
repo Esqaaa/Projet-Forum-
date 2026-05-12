@@ -10,7 +10,6 @@ import (
     "time"
 )
 
-// GetLoggedUserID : Récupère l'ID via le cookie "session"
 func GetLoggedUserID(r *http.Request) int {
 	cookie, err := r.Cookie("session")
 	if err != nil {
@@ -252,4 +251,23 @@ func UpdateTopicStatusHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+}
+
+// Epingler un topic 
+func PinTopicHandler(w http.ResponseWriter, r *http.Request) {
+    userID := GetLoggedUserID(r)
+    topicID := r.URL.Query().Get("id")
+
+    if userID == 0 {
+        http.Redirect(w, r, "/login", http.StatusSeeOther)
+        return
+    }
+
+    _, err := database.DB.Exec("UPDATE topics SET is_pinned = NOT is_pinned WHERE id = ?", topicID)
+    if err != nil {
+        fmt.Println("Erreur lors de l'UPDATE is_pinned:", err)
+        http.Error(w, "Erreur lors de l'épinglage", 500)
+        return
+    }
+    http.Redirect(w, r, "/", http.StatusSeeOther)
 }
