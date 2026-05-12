@@ -38,7 +38,7 @@
                    style="text-decoration: none; font-size: 0.75rem; padding: 5px 10px; border-radius: 4px; border: 1px solid #ffbd44; color: #ffbd44; {{if eq .Topic.Status "fermé"}}background: rgba(255, 189, 68, 0.15);{{end}}">Fermé</a>
                 
                 <a href="/topic/update-status?id={{.Topic.ID}}&status=archivé" 
-                   style="text-decoration: none; font-size: 0.75rem; padding: 5px 10px; border-radius: 4px; border: 1px solid #999; color: #999; {{if eq .Topic.Status "archivé"}}background: rgba(153, 153, 153, 0.15);{{end}}">Archivé</a>
+                   style="text-decoration: none; font-size: 0.75rem; padding: 5px 10px; border-radius: 4px; border: 1px solid #ff0000; color: #ff0000; {{if eq .Topic.Status "archivé"}}background: rgba(153, 153, 153, 0.15);{{end}}">Archivé</a>
             </div>
         </div>
         {{end}}
@@ -81,14 +81,14 @@
             {{else}}
                 <p style="opacity: 0.5; font-style: italic; margin-bottom: 30px;">Aucun message pour le moment...</p>
             {{end}}
-
-            <h3 style="margin-top: 40px; margin-bottom: 20px;">Répondre au sujet</h3>
             
-            {{if eq .Topic.Status "fermé"}}
-                <div style="background: rgba(255, 99, 99, 0.1); color: #ff6363; padding: 15px; border-radius: 8px; border: 1px solid rgba(255, 99, 99, 0.2);">
-                    <strong>Topic fermé.</strong> Les réponses sont désactivées.
+            {{if or (eq .Topic.Status "fermé") (eq .Topic.Status "archivé")}}
+                <div style="background: rgba(255, 255, 255, 0.05); color: #bbb; padding: 25px; border-radius: 12px; border: 1px dashed rgba(255, 255, 255, 0.2); text-align: center;">
+                    <i class="fa-solid fa-lock" style="margin-bottom: 10px; font-size: 1.2rem;"></i><br>
+                    Ce sujet est <strong>{{.Topic.Status}}</strong>. Les interactions sont désactivées.
                 </div>
             {{else}}
+                <h3 style="margin-top: 40px; margin-bottom: 20px;">Répondre au sujet</h3>
                 <form action="/message/post" method="POST">
                     <input type="hidden" name="topic_id" value="{{.Topic.ID}}">
                     <textarea name="content" placeholder="Écrivez votre message ici..." required 
