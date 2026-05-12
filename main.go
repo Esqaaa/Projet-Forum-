@@ -21,8 +21,22 @@ func main() {
 	http.HandleFunc("/message/post", handlers.PostMessageHandler)
 	http.HandleFunc("/topic/delete", handlers.DeleteTopicHandler)
 	http.HandleFunc("/message/delete", handlers.DeleteMessageHandler)
+	http.HandleFunc("/topic/update-status", handlers.UpdateTopicStatusHandler)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Si l'URL n'est pas exactement "/", on renvoie une erreur 404
+		if r.URL.Path != "/" {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		// Protection : Si l'utilisateur n'est pas connecté, on le dégage vers le login
+		userID := handlers.GetLoggedUserID(r) 
+		if userID == 0 {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
 		// Requête SQL sans image_url, avec jointure pour le pseudo
 		query := `
 			SELECT t.id, t.title, t.content, t.status, t.created_at, u.username 

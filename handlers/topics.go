@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-// getLoggedUserID : Récupère l'ID via le cookie "session"
-func getLoggedUserID(r *http.Request) int {
+// GetLoggedUserID : Récupère l'ID via le cookie "session"
+func GetLoggedUserID(r *http.Request) int {
 	cookie, err := r.Cookie("session")
 	if err != nil {
 		return 0
@@ -24,7 +24,7 @@ func getLoggedUserID(r *http.Request) int {
 }
 
 func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
-	userID := getLoggedUserID(r)
+	userID := GetLoggedUserID(r)
 	if userID == 0 {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
@@ -108,7 +108,7 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     data := map[string]interface{}{
         "Topic":         t,
         "Comments":      comments,
-        "CurrentUserID": getLoggedUserID(r),
+        "CurrentUserID": GetLoggedUserID(r),
     }
     RenderTemplate(w, "view_topic.html", data)
 }
@@ -119,7 +119,7 @@ func PostMessageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    userID := getLoggedUserID(r)
+    userID := GetLoggedUserID(r)
     if userID == 0 {
         http.Redirect(w, r, "/login", http.StatusSeeOther)
         return
@@ -145,7 +145,7 @@ func PostMessageHandler(w http.ResponseWriter, r *http.Request) {
 
 // DeleteTopicHandler supprime un topic et ses messages (grâce au ON DELETE CASCADE en SQL)
 func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
-    userID := getLoggedUserID(r)
+    userID := GetLoggedUserID(r)
     topicID := r.URL.Query().Get("id")
 
     // 1. Vérifier que c'est bien l'auteur qui demande la suppression
@@ -165,7 +165,7 @@ func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
 
 // DeleteMessageHandler permet au proprio du topic de supprimer un message
 func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
-    userID := getLoggedUserID(r)
+    userID := GetLoggedUserID(r)
     messageID := r.URL.Query().Get("id")
     topicID := r.URL.Query().Get("topic_id")
 
@@ -182,5 +182,36 @@ func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     database.DB.Exec("DELETE FROM messages WHERE id = ?", messageID)
+    http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+}
+
+func UpdateTopicStatusHandler(w http.ResponseWriter, r *http.Request) {
+    userID := GetLoggedUserID(r)
+    topicID := r.URL.Query().Get("id")
+    newStatus := r.URL.Query().Get("status") // On récupère le statut souhaité : ouvert, fermé ou archivé
+
+    // Vérification de sécurité (Propriétaire ?)
+    var authorID int
+    err := database.DB.QueryRow("SELECT author_id FROM topics WHERE id = ?", topicID).Scan(&authorID)
+    
+    if err != nil || userID != authorID {
+        http.Error(w, "Action non autorisée", http.StatusForbidden)
+        return
+    }
+
+    // Validation du statut pour éviter n'importe quoi en BDD
+    validStatuses := map[string]bool{"ouvert": true, "fermé": true, "archivé": true}
+    if !validStatuses[newStatus] {
+        http.Error(w, "Statut invalide", http.StatusBadRequest)
+        return
+    }
+
+    // Mise à jour
+    _, err = database.DB.Exec("UPDATE topics SET status = ? WHERE id = ?", newStatus, topicID)
+    if err != nil {
+        http.Error(w, "Erreur BDD", 500)
+        return
+    }
+
     http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
 }
