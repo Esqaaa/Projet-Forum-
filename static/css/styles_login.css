@@ -111,6 +111,76 @@ a:hover {
     animation: popupFade 0.4s ease;
 }
 
+.large-form {
+    width: 800px !important;
+    max-width: 95%;
+    padding: 40px !important;
+}
+
+.textarea-group {
+    background: rgba(255,255,255,0.92);
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.textarea-group textarea {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 15px;
+    font-size: 16px;
+    font-family: inherit;
+    outline: none;
+    resize: vertical; 
+    min-height: 200px;
+}
+
+.image-upload {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.image-upload label {
+    display: inline-block;
+    padding: 2% 30%;
+    align-items: center;
+    font-size: 1.2rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px dashed #5a78ff;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.image-upload label:hover {
+    background: rgba(90, 120, 255, 0.3);
+}
+
+.image-upload input[type="file"] {
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+.upload-btn {
+  display: inline-block;
+  background-color: #444;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.upload-btn:hover {
+  background-color: #666;
+}
+
+.btn-annuler {
+    opacity: 0.8;
+    font-size: 16px !important;
+}
+
 @keyframes popupFade {
     from {
         opacity: 0;

@@ -5,6 +5,9 @@ import (
 	"forum/models"
 	"net/http"
     "fmt"
+    "io"
+    "os"
+    "time"
 )
 
 func getLoggedUserID(r *http.Request) int {
@@ -34,6 +37,45 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+    if r.Method == http.MethodPost {
+		// 1. Parser le formulaire pour inclure les fichiers (max 5 Mo ici)
+		r.ParseMultipartForm(5 << 20) 
+
+		title := r.FormValue("title")
+		content := r.FormValue("content")
+		var imagePath string
+
+		// 2. Gestion de l'image
+		file, handler, err := r.FormFile("image")
+		if err == nil { // Si une image a été envoyée
+			defer file.Close()
+
+			// Créer un nom de fichier unique
+			fileName := fmt.Sprintf("%d-%s", time.Now().Unix(), handler.Filename)
+			imagePath = "/static/uploads/" + fileName
+
+			// Créer le fichier sur le serveur
+			dst, err := os.Create("." + imagePath)
+			if err != nil {
+				http.Error(w, "Erreur stockage image", 500)
+				return
+			}
+			defer dst.Close()
+			io.Copy(dst, file)
+		}
+
+		// 3. Insertion en DB (Ajoutez la colonne image_url dans votre table)
+		query := "INSERT INTO topics (title, content, author_id, status, image_url) VALUES (?, ?, ?, ?, ?)"
+		_, err = database.DB.Exec(query, title, content, userID, "ouvert", imagePath)
+		
+		if err != nil {
+			http.Error(w, "Erreur création : "+err.Error(), 500)
+			return
+		}
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+
+
 	if r.Method == http.MethodPost {
 		title := r.FormValue("title")
 		content := r.FormValue("content")
@@ -57,7 +99,7 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     var rawDate []byte
 
     query := `
-        SELECT t.id, t.title, t.content, t.status, t.is_pinned, t.created_at, u.username, t.author_id
+        SELECT t.id, t.title, t.content, t.status, t.is_pinned, t.created_at, u.username, t.author_id, t.image_url
         FROM topics t
         JOIN users u ON t.author_id = u.id
         WHERE t.id = ?`
@@ -71,6 +113,7 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
         &rawDate, 
         &t.Author,
         &t.AuthorID,
+        &t.ImageURL,
     )
 
     if err != nil {

@@ -2,7 +2,7 @@
 <link rel="stylesheet" href="/static/css/styles_login.css"> 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<form method="POST" action="/topic/create" style="max-width: 500px; margin: 50px auto;">
+<form method="POST" action="/topic/create" enctype="multipart/form-data" class="large-form">
     <h1>NOUVEAU SUJET</h1>
 
     <div class="input-group">
@@ -10,9 +10,22 @@
         <input type="text" name="title" placeholder="Titre du topic" required>
     </div>
 
-    <div class="input-group" style="height: auto;">
-        <textarea name="content" placeholder="Contenu de votre message..." rows="6" 
-                  style="border: none; background: transparent; width: 100%; padding: 10px; outline: none;"></textarea>
+    <div class="image-upload">
+        <label for="image">
+            <i class="fa-solid fa-image"></i> Ajouter une image (Optionnel)
+        </label>
+        <input class="image-upload" type="file" id="image" name="image" accept="image/*">
+    </div>
+
+    <div class="image-upload">
+        <input type="file" id=""image name="image" accept="image/*" style="display: none;">
+        <label for="image" class="upload-btn">
+            <i class="fa-solid fa-image"></i> Ajouter une image (Optionnel)
+        </label>
+    </div>
+
+    <div class="input-group textarea-group">
+        <textarea name="content" placeholder="Contenu de votre message..." rows="8" ></textarea>
     </div>
 
     <button type="submit">Publier</button>
