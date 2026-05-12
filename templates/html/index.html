@@ -1,5 +1,22 @@
 {{define "content"}}
 <link rel="stylesheet" href="/static/css/forum.css">
+<style>
+    /* Empêche le lien de changer la couleur du texte et retire le soulignement */
+    .topic-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        margin-bottom: 20px;
+    }
+    
+    /* Effet de survol sur toute la carte */
+    .topic-card:hover {
+        background: rgba(255, 255, 255, 0.08); /* Un peu plus clair au survol */
+        transform: translateY(-2px);
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+</style>
 
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
@@ -9,13 +26,21 @@
 
     <div class="topics-list">
         {{range .}}
-        <div class="topic-card">
-            <h3>{{.Title}}</h3>
-            <p>{{.Content}}</p>
-            <div style="font-size: 0.8rem; opacity: 0.6; margin-top: 10px;">
-                <i class="fa-regular fa-clock"></i> {{.Date}}
+        <a href="/topic/view?id={{.ID}}" class="topic-link">
+            <div class="topic-card">
+                <h3 style="color: #bc84ee; margin-bottom: 10px;">{{.Title}}</h3>
+                <p style="margin-bottom: 15px;">{{.Content}}</p>
+                
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.6;">
+                    <div>
+                        Par <strong>{{.Author}}</strong>
+                    </div>
+                    <div>
+                        {{.CreatedAt}}
+                    </div>
+                </div>
             </div>
-        </div>
+        </a>
         {{else}}
         <p style="text-align: center; opacity: 0.5;">Aucun sujet pour le moment...</p>
         {{end}}

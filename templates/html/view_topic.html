@@ -1,12 +1,38 @@
-<h1>{{.Topic.Title}}</h1>
-<p>{{.Topic.Content}}</p>
+{{define "content"}}
+<link rel="stylesheet" href="/static/css/forum.css">
 
-{{if eq .Topic.Status "fermé"}}
-    <p><strong>Ce topic est fermé. Les réponses sont désactivées.</strong></p>
-{{else}}
-    <form action="/message/post" method="POST">
-        <input type="hidden" name="topic_id" value="{{.Topic.ID}}">
-        <textarea name="content" placeholder="Votre message..." required></textarea>
-        <button type="submit">Envoyer</button>
-    </form>
+<div class="container">
+    <div class="glass-card" style="padding: 40px; text-align: left;">
+        <a href="/" style="color: #6384ff; text-decoration: none; font-size: 0.9rem;">← Retour à l'accueil</a>
+        
+        <h1 style="margin-top: 25px; color: #bc84ee;">{{.Topic.Title}}</h1>
+        
+        <div style="display: flex; gap: 15px; font-size: 0.8rem; opacity: 0.5; margin-bottom: 30px;">
+            <span>Par <strong>{{.Topic.Author}}</strong></span>
+            <span>•</span>
+            <span>Statut : {{.Topic.Status}}</span>
+        </div>
+        
+        <div style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 40px; white-space: pre-wrap;">
+            {{.Topic.Content}}
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;">
+            <h3 style="margin-bottom: 20px;">Répondre au sujet</h3>
+            
+            {{if eq .Topic.Status "fermé"}}
+                <div style="background: rgba(255, 99, 99, 0.1); color: #ff6363; padding: 15px; border-radius: 8px; border: 1px solid rgba(255, 99, 99, 0.2);">
+                    <strong>Ce topic est fermé.</strong> Les réponses sont désactivées.
+                </div>
+            {{else}}
+                <form action="/message/post" method="POST">
+                    <input type="hidden" name="topic_id" value="{{.Topic.ID}}">
+                    <textarea name="content" placeholder="Écrivez votre message ici..." required 
+                        style="width: 100%; height: 120px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 15px; border-radius: 8px; font-family: inherit; margin-bottom: 15px;"></textarea>
+                    <button type="submit" class="btn-main">Envoyer le message</button>
+                </form>
+            {{end}}
+        </div>
+    </div>
+</div>
 {{end}}
