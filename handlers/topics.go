@@ -4,9 +4,9 @@ import (
 	"forum/database"
 	"forum/models"
 	"net/http"
+    "fmt"
 )
 
-// getLoggedUserID : Récupère l'ID via le cookie "session"
 func getLoggedUserID(r *http.Request) int {
 	cookie, err := r.Cookie("session")
 	if err != nil {
@@ -14,7 +14,6 @@ func getLoggedUserID(r *http.Request) int {
 	}
 
 	var userID int
-	// On cherche l'ID qui correspond au pseudo ou email stocké dans le cookie
 	query := "SELECT id FROM users WHERE username = ? OR email = ?"
 	err = database.DB.QueryRow(query, cookie.Value, cookie.Value).Scan(&userID)
 	if err != nil {
@@ -39,7 +38,6 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 		title := r.FormValue("title")
 		content := r.FormValue("content")
 		
-		// INSERT sans image (pour le moment)
 		_, err := database.DB.Exec(
 			"INSERT INTO topics (title, content, author_id, status) VALUES (?, ?, ?, ?)",
 			title, content, userID, "ouvert",
@@ -58,32 +56,32 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     var t models.Topic
     var rawDate []byte
 
-    // 1. On ajoute t.author_id dans le SELECT
     query := `
-        SELECT t.id, t.title, t.content, t.status, t.created_at, u.username, t.author_id 
-        FROM topics t 
-        JOIN users u ON t.author_id = u.id 
+        SELECT t.id, t.title, t.content, t.status, t.is_pinned, t.created_at, u.username, t.author_id
+        FROM topics t
+        JOIN users u ON t.author_id = u.id
         WHERE t.id = ?`
-    
-    // 2. On ajoute &t.AuthorID dans le Scan
+
     err := database.DB.QueryRow(query, topicID).Scan(
         &t.ID, 
         &t.Title, 
         &t.Content, 
         &t.Status, 
+        &t.IsPinned, 
         &rawDate, 
         &t.Author,
         &t.AuthorID,
     )
 
     if err != nil {
+        fmt.Println("Erreur ViewTopic:", err) 
         http.Redirect(w, r, "/", http.StatusSeeOther)
         return
     }
+    
     t.CreatedAt = string(rawDate)
     t.Date = string(rawDate)
 
-    // 3. On récupère aussi l'ID du message pour pouvoir le supprimer (FT-06)
     rows, err := database.DB.Query(`
         SELECT m.id, m.content, m.created_at, u.username 
         FROM messages m 
@@ -99,7 +97,6 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     for rows != nil && rows.Next() {
         var c models.Comment
         var cDate []byte
-        // On scanne l'ID du message ici
         rows.Scan(&c.ID, &c.Content, &cDate, &c.Author)
         c.Date = string(cDate)
         comments = append(comments, c)
@@ -147,19 +144,16 @@ func PostMessageHandler(w http.ResponseWriter, r *http.Request) {
 func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
     userID := getLoggedUserID(r)
     topicID := r.URL.Query().Get("id")
-
-    // 1. Vérifier que c'est bien l'auteur qui demande la suppression
     var authorID int
-    err := database.DB.QueryRow("SELECT author_id FROM topics WHERE id = ?", topicID).Scan(&authorID)
     
+    err := database.DB.QueryRow("SELECT author_id FROM topics WHERE id = ?", topicID).Scan(&authorID)
+
     if err != nil || userID != authorID {
         http.Error(w, "Action non autorisée", http.StatusForbidden)
         return
     }
 
-    // 2. Supprimer (Le ON DELETE CASCADE dans la BDD s'occupera des messages)
     database.DB.Exec("DELETE FROM topics WHERE id = ?", topicID)
-
     http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
@@ -183,4 +177,25 @@ func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
 
     database.DB.Exec("DELETE FROM messages WHERE id = ?", messageID)
     http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+}
+
+// Ajouter un topic aux favoris 
+func PinTopicHandler(w http.ResponseWriter, r *http.Request) {
+	userID := getLoggedUserID(r)
+	topicID := r.URL.Query().Get("id")
+
+	// Si l'utilisateur n'est pas connecté, on redirige
+	if userID == 0 {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	_, err := database.DB.Exec("UPDATE topics SET is_pinned = NOT is_pinned WHERE id = ?", topicID)
+	if err != nil {
+		fmt.Println("Erreur SQL Pin:", err)
+		http.Error(w, "Erreur lors de l'épinglage", 500)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

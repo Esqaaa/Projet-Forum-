@@ -1,22 +1,8 @@
 {{define "content"}}
+
 <link rel="stylesheet" href="/static/css/forum.css">
-<style>
-    /* Empêche le lien de changer la couleur du texte et retire le soulignement */
-    .topic-link {
-        text-decoration: none;
-        color: inherit;
-        display: block;
-        margin-bottom: 20px;
-    }
-    
-    /* Effet de survol sur toute la carte */
-    .topic-card:hover {
-        background: rgba(255, 255, 255, 0.08); /* Un peu plus clair au survol */
-        transform: translateY(-2px);
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-</style>
+<link rel="stylesheet" href="/static/css/topic.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
@@ -25,25 +11,41 @@
     </div>
 
     <div class="topics-list">
+
         {{range .}}
-        <a href="/topic/view?id={{.ID}}" class="topic-link">
-            <div class="topic-card">
-                <h3 style="color: #bc84ee; margin-bottom: 10px;">{{.Title}}</h3>
-                <p style="margin-bottom: 15px;">{{.Content}}</p>
-                
-                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.6;">
-                    <div>
-                        Par <strong>{{.Author}}</strong>
+        <div style="position: relative;">
+
+            <a href="/topic/pin?id={{.ID}}" 
+               class="pin-btn {{if .IsPinned}}pinned{{end}}" 
+               title="Épingler le sujet">
+                <i class="fa-solid fa-thumbtack"></i>
+            </a>
+
+            <a href="/topic/view?id={{.ID}}" class="topic-link">
+                <div class="topic-card" style="{{if .IsPinned}}border-left: 4px solid #bc84ee;{{end}}">
+                    <h3 style="color: #bc84ee; margin-bottom: 10px; padding-left: 20px; color: {{if .IsPinned}}#FFA800{{else}}#bc84ee{{end}};">
+                        {{if .IsPinned}}{{end}}{{.Title}}
+                    </h3>
+
+                    <p style="margin-bottom: 15px;">{{.Content}}</p>
+
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.6;">
+                        <div>Par <strong>{{.Author}}</strong></div>
+                        <div>{{.CreatedAt}}</div>
                     </div>
-                    <div>
-                        {{.CreatedAt}}
-                    </div>
+
                 </div>
-            </div>
-        </a>
+            </a>
+
+        </div>
         {{else}}
+
         <p style="text-align: center; opacity: 0.5;">Aucun sujet pour le moment...</p>
+
         {{end}}
+
     </div>
+
 </div>
+
 {{end}}

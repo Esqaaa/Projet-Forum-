@@ -11,6 +11,7 @@ type Topic struct {
 	Date        string      // Date formatée pour l'affichage HTML
 	AuthorID 	int 		// ID de l'auteur du topic
 	Author      string      // Nom de l'auteur du topic
+	IsPinned 	bool		// Si un post est épinglé 
 	Status 		string 		// Statut du topic (ex: "Ouvert", "Fermé", "Archivé")
 }
 
