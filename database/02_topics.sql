@@ -11,3 +11,6 @@ CREATE TABLE IF NOT EXISTS topics (
     status ENUM('ouvert', 'fermé', 'archivé') DEFAULT 'ouvert', 
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE 
 );
+
+
+ALTER TABLE topics ADD COLUMN is_pinned BOOLEAN DEFAULT 0;

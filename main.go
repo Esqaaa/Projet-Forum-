@@ -18,6 +18,7 @@ func main() {
 	http.HandleFunc("/logout", handlers.LogoutHandler)
 	http.HandleFunc("/topic/create", handlers.CreateTopicHandler)
 	http.HandleFunc("/topic/view", handlers.ViewTopicHandler)
+	http.HandleFunc("/topic/pin", handlers.PinTopicHandler)
 	http.HandleFunc("/message/post", handlers.PostMessageHandler)
 	http.HandleFunc("/topic/delete", handlers.DeleteTopicHandler)
 	http.HandleFunc("/message/delete", handlers.DeleteMessageHandler)
@@ -39,10 +40,10 @@ func main() {
 
 		// Requête SQL sans image_url, avec jointure pour le pseudo
 		query := `
-			SELECT t.id, t.title, t.content, t.status, t.created_at, u.username 
+			SELECT t.id, t.title, t.content, t.status, t.is_pinned, t.created_at, u.username 
 			FROM topics t 
 			JOIN users u ON t.author_id = u.id 
-			ORDER BY t.created_at DESC`
+			ORDER BY t.is_pinned DESC, t.created_at DESC`
 		
 		rows, err := database.DB.Query(query)
 		if err != nil {
@@ -56,13 +57,21 @@ func main() {
 			var t models.Topic
 			var rawDate []byte
 			
-			// Scan dans l'ordre du SELECT
-			err := rows.Scan(&t.ID, &t.Title, &t.Content, &t.Status, &rawDate, &t.Author)
+			err := rows.Scan(
+				&t.ID, 
+				&t.Title, 
+				&t.Content, 
+				&t.Status, 
+				&t.IsPinned, 
+				&rawDate, 
+				&t.Author,
+			)
 			if err != nil {
+				fmt.Println("Erreur scan topic:", err)
 				continue 
 			}
 			
-			t.CreatedAt = string(rawDate) // On remplit CreatedAt (ton champ string)
+			t.CreatedAt = string(rawDate)
 			topics = append(topics, t)
 		}
 

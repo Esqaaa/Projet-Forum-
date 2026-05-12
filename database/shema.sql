@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS topics (
     content TEXT NOT NULL, 
     tags VARCHAR(255), 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP, 
-    author_id INT NOT NULL, 
+    author_id INT NOT NULL,
+    is_pinned BOOLEAN DEFAULT 0, 
     status ENUM('ouvert', 'fermé', 'archivé') DEFAULT 'ouvert', 
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE 
 );

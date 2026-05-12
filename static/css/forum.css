@@ -1,8 +1,7 @@
-/* Styles pour l'accueil et la création de topics */
 body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    background-color: #1a1a40; /* Couleur sombre du fond */
+    background-color: #1a1a40;
     color: white;
     display: flex;
     flex-direction: column;
@@ -14,15 +13,15 @@ body {
     width: 90%;
     max-width: 900px;
     margin-top: 50px;
-    background: rgba(255, 255, 255, 0.05); /* Effet verre */
+    background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     padding: 30px;
     border-radius: 15px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Style des cartes de topics */
 .topic-card {
+    position: relative;
     background: rgba(255, 255, 255, 0.1);
     margin-bottom: 20px;
     padding: 20px;
@@ -37,10 +36,9 @@ body {
 
 .topic-card h3 {
     margin: 0 0 10px 0;
-    color: #6384ff; /* Le bleu de ton bouton login */
+    color: #6384ff;
 }
 
-/* Réutilisation du style de bouton de ton pote */
 .btn-main {
     background-color: #6384ff;
     color: white;
@@ -57,7 +55,6 @@ body {
     background-color: #4a6cf7;
 }
 
-/* Formulaire de création */
 .form-create textarea {
     width: 100%;
     background: #eaeff2;
