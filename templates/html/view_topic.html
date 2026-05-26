@@ -1,102 +1,193 @@
 {{define "content"}}
+
 <link rel="stylesheet" href="/static/css/forum.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <div class="container">
-    <div class="glass-card" style="padding: 40px; text-align: left;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div class="glass-card" style="padding:40px; text-align:left;">
+
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
             <div>
-                <a href="/" style="color: #6384ff; text-decoration: none; font-size: 0.9rem;">← Retour à l'accueil</a>
-                <h1 style="margin-top: 20px; color: #bc84ee; margin-bottom: 10px;">{{.Topic.Title}}</h1>
-                
-                <div style="display: flex; gap: 15px; font-size: 0.8rem; opacity: 0.5;">
+                <a href="/" style="color:#6384ff; text-decoration:none; font-size:0.9rem;">
+                    ← Retour à l'accueil
+                </a>
+
+                <h1 style="margin-top:20px; color:#bc84ee; margin-bottom:10px;">
+                    {{.Topic.Title}}
+                </h1>
+
+                <div style="display:flex; gap:15px; font-size:0.8rem; opacity:0.5;">
                     <span>Par <strong>{{.Topic.Author}}</strong></span>
                     <span>•</span>
                     <span>Le {{.Topic.CreatedAt}}</span>
                     <span>•</span>
-                    <span style="text-transform: capitalize;">Statut : <strong>{{.Topic.Status}}</strong></span>
+                    <span style="text-transform:capitalize;">
+                        Statut : <strong>{{.Topic.Status}}</strong>
+                    </span>
                 </div>
             </div>
 
             {{if eq .CurrentUserID .Topic.AuthorID}}
-            <a href="/topic/delete?id={{.Topic.ID}}" 
+            <a href="/topic/delete?id={{.Topic.ID}}"
                onclick="return confirm('Es-tu sûr de vouloir supprimer ce topic et tous ses messages ?')"
-               style="color: #ff6363; text-decoration: none; font-size: 0.8rem; padding: 8px 12px; border: 1px solid #ff6363; border-radius: 5px; background: rgba(255, 99, 99, 0.05);">
+               style="color:#ff6363; text-decoration:none; font-size:0.8rem; padding:8px 12px; border:1px solid #ff6363; border-radius:5px; background:rgba(255,99,99,0.05);">
                 <i class="fa-solid fa-trash"></i> Supprimer
             </a>
             {{end}}
         </div>
 
         {{if eq .CurrentUserID .Topic.AuthorID}}
-        <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 15px;">
-            <span style="font-size: 0.85rem; font-weight: bold; color: #bc84ee;">Administrer le statut :</span>
-            <div style="display: flex; gap: 8px;">
-                <a href="/topic/update-status?id={{.Topic.ID}}&status=ouvert" 
-                   style="text-decoration: none; font-size: 0.75rem; padding: 5px 10px; border-radius: 4px; border: 1px solid #44ff70; color: #44ff70; {{if eq .Topic.Status "ouvert"}}background: rgba(68, 255, 112, 0.15);{{end}}">Ouvert</a>
-                
-                <a href="/topic/update-status?id={{.Topic.ID}}&status=fermé" 
-                   style="text-decoration: none; font-size: 0.75rem; padding: 5px 10px; border-radius: 4px; border: 1px solid #ffbd44; color: #ffbd44; {{if eq .Topic.Status "fermé"}}background: rgba(255, 189, 68, 0.15);{{end}}">Fermé</a>
-                
-                <a href="/topic/update-status?id={{.Topic.ID}}&status=archivé" 
-                   style="text-decoration: none; font-size: 0.75rem; padding: 5px 10px; border-radius: 4px; border: 1px solid #ff0000; color: #ff0000; {{if eq .Topic.Status "archivé"}}background: rgba(153, 153, 153, 0.15);{{end}}">Archivé</a>
+        <div style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:15px;">
+            <span style="font-size:0.85rem; font-weight:bold; color:#bc84ee;">
+                Administrer le statut :
+            </span>
+
+            <div style="display:flex; gap:8px;">
+                <a href="/topic/update-status?id={{.Topic.ID}}&status=ouvert"
+                   style="text-decoration:none; font-size:0.75rem; padding:5px 10px; border-radius:4px; border:1px solid #44ff70; color:#44ff70; {{if eq .Topic.Status "ouvert"}}background:rgba(68,255,112,0.15);{{end}}">
+                    Ouvert
+                </a>
+
+                <a href="/topic/update-status?id={{.Topic.ID}}&status=fermé"
+                   style="text-decoration:none; font-size:0.75rem; padding:5px 10px; border-radius:4px; border:1px solid #ffbd44; color:#ffbd44; {{if eq .Topic.Status "fermé"}}background:rgba(255,189,68,0.15);{{end}}">
+                    Fermé
+                </a>
+
+                <a href="/topic/update-status?id={{.Topic.ID}}&status=archivé"
+                   style="text-decoration:none; font-size:0.75rem; padding:5px 10px; border-radius:4px; border:1px solid #ff0000; color:#ff0000; {{if eq .Topic.Status "archivé"}}background:rgba(153,153,153,0.15);{{end}}">
+                    Archivé
+                </a>
             </div>
         </div>
         {{end}}
-        
-        <div style="line-height: 1.8; font-size: 1.1rem; margin-bottom: 20px; white-space: pre-wrap;">
+
+        <div style="line-height:1.8; font-size:1.1rem; margin-top:30px; margin-bottom:20px; white-space:pre-wrap;">
             {{.Topic.Content}}
         </div>
 
         {{if .Topic.ImageURL}}
-        <div style="margin-bottom: 40px; text-align: center; background: rgba(0,0,0,0.2); border-radius: 12px; padding: 10px; border: 1px solid rgba(255,255,255,0.05);">
+        <div style="margin-bottom:40px; text-align:center; background:rgba(0,0,0,0.2); border-radius:12px; padding:10px; border:1px solid rgba(255,255,255,0.05);">
             <a href="{{.Topic.ImageURL}}" target="_blank">
-                <img src="{{.Topic.ImageURL}}" alt="Illustration du sujet" 
-                     style="max-width: 100%; max-height: 500px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                <img src="{{.Topic.ImageURL}}" alt="Illustration du sujet" style="max-width:100%; max-height:500px; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.5);">
             </a>
-            <p style="font-size: 0.7rem; opacity: 0.4; margin-top: 8px;">Cliquez sur l'image pour l'agrandir</p>
+            <p style="font-size:0.7rem; opacity:0.4; margin-top:8px;">
+                Cliquez sur l'image pour l'agrandir
+            </p>
         </div>
         {{end}}
 
-        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px;">
-            <h3 style="margin-bottom: 25px;"><i class="fa-regular fa-comments"></i> Commentaires</h3>
-            
+        <div style="border-top:1px solid rgba(255,255,255,0.1); padding-top:30px;">
+            <h3 style="margin-bottom:25px;">
+                <i class="fa-regular fa-comments"></i> Commentaires
+            </h3>
+
             {{range .Comments}}
-                <div style="background: rgba(255, 255, 255, 0.03); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.05); position: relative;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.6; margin-bottom: 10px;">
-                        <div>
-                            <strong style="color: #bc84ee;">{{.Author}}</strong> 
-                            <span style="margin-left: 10px;">{{.Date}}</span>
-                        </div>
+            <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:8px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.05); position:relative;">
+                
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; opacity:0.6; margin-bottom:10px;">
+                    <div>
+                        <strong style="color:#bc84ee;">{{.Author}}</strong>
+                        <span style="margin-left:10px;">{{.Date}}</span>
+                    </div>
+
+                    <div style="display:flex; gap:15px; align-items:center;">
+                        <button onclick="toggleEdit('{{.ID}}')" style="background:none; border:none; color:#ffbd44; cursor:pointer; padding:0;" title="Modifier">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
 
                         {{if eq $.CurrentUserID $.Topic.AuthorID}}
-                        <a href="/message/delete?id={{.ID}}&topic_id={{$.Topic.ID}}" 
+                        <a href="/message/delete?id={{.ID}}&topic_id={{$.Topic.ID}}"
                            onclick="return confirm('Supprimer ce message ?')"
-                           style="color: #ff6363; text-decoration: none;" title="Supprimer le message">
+                           style="color:#ff6363; text-decoration:none;">
                             <i class="fa-solid fa-xmark"></i>
                         </a>
                         {{end}}
                     </div>
-                    <div style="line-height: 1.5; white-space: pre-wrap;">{{.Content}}</div>
                 </div>
+
+                <div id="content-{{.ID}}" style="line-height:1.5; white-space:pre-wrap;">{{.Content}}</div>
+
+                <div id="edit-form-{{.ID}}" style="display:none; margin-top:10px;">
+                    <form action="/message/edit" method="POST">
+                        <input type="hidden" name="message_id" value="{{.ID}}">
+                        <input type="hidden" name="topic_id" value="{{$.Topic.ID}}">
+
+                        <textarea id="textarea-{{.ID}}" name="content" oninput="autoGrow(this)" style="
+                            width:100%;
+                            min-height:40px;
+                            height:auto;
+                            background:rgba(255,255,255,0.05);
+                            border:1px solid rgba(255,255,255,0.1);
+                            color:white;
+                            padding:10px;
+                            border-radius:8px;
+                            font-family:inherit;
+                            line-height:1.5;
+                            resize:vertical;
+                            overflow:hidden;">{{.Content}}</textarea>
+
+                        <div style="margin-top:10px; display:flex; gap:10px;">
+                            <button type="submit" class="btn-main" style="padding:6px 15px; font-size:0.85rem; margin-top:0;">
+                                Sauvegarder
+                            </button>
+                            <button type="button" onclick="toggleEdit('{{.ID}}')" style="background:transparent; color:white; border:1px solid rgba(255,255,255,0.2); padding:6px 15px; border-radius:8px; cursor:pointer; font-size:0.85rem;">
+                                Annuler
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
             {{else}}
-                <p style="opacity: 0.5; font-style: italic; margin-bottom: 30px;">Aucun message pour le moment...</p>
+            <p style="opacity:0.5; font-style:italic; margin-bottom:30px;">
+                Aucun message pour le moment...
+            </p>
             {{end}}
-            
+
             {{if or (eq .Topic.Status "fermé") (eq .Topic.Status "archivé")}}
-                <div style="background: rgba(255, 255, 255, 0.05); color: #bbb; padding: 25px; border-radius: 12px; border: 1px dashed rgba(255, 255, 255, 0.2); text-align: center;">
-                    <i class="fa-solid fa-lock" style="margin-bottom: 10px; font-size: 1.2rem;"></i><br>
-                    Ce sujet est <strong>{{.Topic.Status}}</strong>. Les interactions sont désactivées.
-                </div>
+            <div style="background:rgba(255,255,255,0.05); color:#bbb; padding:25px; border-radius:12px; border:1px dashed rgba(255,255,255,0.2); text-align:center;">
+                <i class="fa-solid fa-lock" style="margin-bottom:10px; font-size:1.2rem;"></i>
+                <br>
+                Ce sujet est <strong>{{.Topic.Status}}</strong>. Les interactions sont désactivées.
+            </div>
             {{else}}
-                <h3 style="margin-top: 40px; margin-bottom: 20px;">Répondre au sujet</h3>
-                <form action="/message/post" method="POST">
-                    <input type="hidden" name="topic_id" value="{{.Topic.ID}}">
-                    <textarea name="content" placeholder="Écrivez votre message ici..." required 
-                        style="width: 100%; height: 120px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 15px; border-radius: 8px; font-family: inherit; margin-bottom: 15px; resize: none;"></textarea>
-                    <button type="submit" class="btn-main">Envoyer le message</button>
-                </form>
+            <h3 style="margin-top:40px; margin-bottom:20px;">
+                Répondre au sujet
+            </h3>
+
+            <form action="/message/post" method="POST">
+                <input type="hidden" name="topic_id" value="{{.Topic.ID}}">
+                <textarea name="content" placeholder="Écrivez votre message ici..." required style="width:100%; height:120px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; padding:15px; border-radius:8px; resize:none;"></textarea>
+                <button type="submit" class="btn-main">
+                    Envoyer le message
+                </button>
+            </form>
             {{end}}
+
         </div>
     </div>
 </div>
+
+<script>
+function toggleEdit(messageId) {
+    let textDiv = document.getElementById('content-' + messageId);
+    let formDiv = document.getElementById('edit-form-' + messageId);
+    let textarea = document.getElementById('textarea-' + messageId);
+
+    if (formDiv.style.display === "none") {
+        formDiv.style.display = "block";
+        textDiv.style.display = "none";
+        // Ajustement automatique de la hauteur dès l'ouverture
+        autoGrow(textarea);
+    } else {
+        formDiv.style.display = "none";
+        textDiv.style.display = "block";
+    }
+}
+
+function autoGrow(element) {
+    element.style.height = "5px"; // Reset temporaire indispensable pour le recalcul
+    element.style.height = (element.scrollHeight) + "px";
+}
+</script>
+
 {{end}}

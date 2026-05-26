@@ -21,6 +21,7 @@ func main() {
 	http.HandleFunc("/topic/pin", handlers.PinTopicHandler)
 	http.HandleFunc("/message/post", handlers.PostMessageHandler)
 	http.HandleFunc("/topic/delete", handlers.DeleteTopicHandler)
+	http.HandleFunc("/message/edit", handlers.EditMessageHandler)
 	http.HandleFunc("/message/delete", handlers.DeleteMessageHandler)
 	http.HandleFunc("/topic/update-status", handlers.UpdateTopicStatusHandler)
 

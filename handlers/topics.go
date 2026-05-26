@@ -209,6 +209,100 @@ func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
     http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
 }
 
+func EditMessageHandler(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPost {
+        http.Redirect(w, r, "/", http.StatusSeeOther)
+        return
+    }
+
+    userID := GetLoggedUserID(r)
+    if userID == 0 {
+        http.Redirect(w, r, "/login", http.StatusSeeOther)
+        return
+    }
+
+    messageID := r.FormValue("message_id")
+    topicID := r.FormValue("topic_id") // Récupère le champ que l'on vient d'ajouter
+    newContent := r.FormValue("content")
+
+    if newContent == "" {
+        http.Error(w, "Le contenu ne peut pas être vide", http.StatusBadRequest)
+        return
+    }
+
+    // Vérification de sécurité : l'utilisateur est-il l'auteur du message ?
+    var commentAuthorID int
+    query := "SELECT author_id FROM messages WHERE id = ?"
+    err := database.DB.QueryRow(query, messageID).Scan(&commentAuthorID)
+    if err != nil {
+        http.Error(w, "Message introuvable", http.StatusNotFound)
+        return
+    }
+
+    if userID != commentAuthorID {
+        http.Error(w, "Action non autorisée", http.StatusForbidden)
+        return
+    }
+
+    // Mise à jour de la BDD
+    _, err = database.DB.Exec("UPDATE messages SET content = ? WHERE id = ?", newContent, messageID)
+    if err != nil {
+        http.Error(w, "Erreur BDD", 500)
+        return
+    }
+
+    // Redirection propre vers la page du topic mis à jour !
+    http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+}
+
+// UpdateMessageHandler permet à l'auteur d'un commentaire de le modifier
+func UpdateMessageHandler(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPost {
+        http.Redirect(w, r, "/", http.StatusSeeOther)
+        return
+    }
+
+    userID := GetLoggedUserID(r)
+    if userID == 0 {
+        http.Redirect(w, r, "/login", http.StatusSeeOther)
+        return
+    }
+
+    messageID := r.FormValue("message_id")
+    topicID := r.FormValue("topic_id")
+    newContent := r.FormValue("content")
+
+    if newContent == "" {
+        http.Error(w, "Le contenu ne peut pas être vide", http.StatusBadRequest)
+        return
+    }
+
+    // Sécurité : On vérifie si l'utilisateur actuel est bien l'auteur du MESSAGE
+    var commentAuthorID int
+    query := "SELECT author_id FROM messages WHERE id = ?"
+    err := database.DB.QueryRow(query, messageID).Scan(&commentAuthorID)
+
+    if err != nil {
+        http.Error(w, "Message introuvable", http.StatusNotFound)
+        return
+    }
+
+    if userID != commentAuthorID {
+        http.Error(w, "Action non autorisée : vous n'êtes pas l'auteur de ce commentaire", http.StatusForbidden)
+        return
+    }
+
+    // Si tout est OK, on met à jour en BDD
+    _, err = database.DB.Exec("UPDATE messages SET content = ? WHERE id = ?", newContent, messageID)
+    if err != nil {
+        http.Error(w, "Erreur lors de la mise à jour du message : "+err.Error(), 500)
+        return
+    }
+
+    // Redirection vers le topic
+    http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+}
+
 func UpdateTopicStatusHandler(w http.ResponseWriter, r *http.Request) {
     userID := GetLoggedUserID(r)
     topicID := r.URL.Query().Get("id")
