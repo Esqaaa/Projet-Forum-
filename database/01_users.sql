@@ -9,4 +9,6 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    role ENUM('user', 'admin') DEFAULT 'user'
+    is_banned BOOLEAN DEFAULT 0
 );

@@ -9,6 +9,8 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    role ENUM('user', 'admin') DEFAULT 'user'
+    is_banned BOOLEAN DEFAULT 0
 );
 
 -- Fichier SQL pour la mission FT-3 - Création d'un topic
