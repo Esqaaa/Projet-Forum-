@@ -23,8 +23,9 @@
 
             <a href="/topic/view?id={{.ID}}" class="topic-link">
                 <div class="topic-card" style="{{if .IsPinned}}border-left: 4px solid #bc84ee;{{end}}">
-                    <h3 style="color: #bc84ee; margin-bottom: 10px; padding-left: 20px; color: {{if .IsPinned}}#FFA800{{else}}#bc84ee{{end}};">
-                        {{if .IsPinned}}{{end}}{{.Title}}
+                    
+                    <h3 style="margin-bottom: 10px; padding-left: 20px; color: {{if or (eq .Status "fermé") (eq .Status "Fermé")}}#ff4a4a{{else if .IsPinned}}#FFA800{{else}}#bc84ee{{end}};">
+                        {{if or (eq .Status "fermé") (eq .Status "Fermé")}}<i class="fa-solid fa-lock" style="font-size: 0.95rem; margin-right: 5px;"></i> {{end}}{{.Title}}
                     </h3>
 
                     <p style="margin-bottom: 15px;">{{.Content}}</p>
