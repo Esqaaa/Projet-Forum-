@@ -74,6 +74,7 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 
 func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     topicID := r.URL.Query().Get("id")
+    currentUserID := GetLoggedUserID(r) // On récupère l'ID du visiteur connecté
 
     var t models.Topic
     var rawDate []byte
@@ -112,12 +113,16 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     t.CreatedAt = string(rawDate)
     t.Date = string(rawDate)
 
+    // On compte le total des likes pour chaque message,
+    // et on regarde si l'utilisateur actuellement connecté (currentUserID) a mis un like ou pas.
     rows, err := database.DB.Query(`
-        SELECT m.id, m.content, m.created_at, u.username 
+        SELECT m.id, m.content, m.created_at, u.username,
+               (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id) AS likes_count,
+               (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id AND user_id = ?) AS has_liked
         FROM messages m 
         JOIN users u ON m.author_id = u.id 
         WHERE m.topic_id = ? 
-        ORDER BY m.created_at ASC`, topicID)
+        ORDER BY m.created_at ASC`, currentUserID, topicID) 
     
     if err == nil {
         defer rows.Close()
@@ -127,7 +132,17 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     for rows != nil && rows.Next() {
         var c models.Comment
         var cDate []byte
-        rows.Scan(&c.ID, &c.Content, &cDate, &c.Author)
+        var hasLikedCount int // Variable temporaire pour intercepter le COUNT (0 ou 1)
+
+        // Ajout des deux nouvelles colonnes dans le Scan
+        err = rows.Scan(&c.ID, &c.Content, &cDate, &c.Author, &c.LikesCount, &hasLikedCount)
+        if err != nil {
+            fmt.Println("Erreur Scan message:", err)
+            continue
+        }
+
+        // Si le COUNT de has_liked est supérieur à 0, ça veut dire que le visiteur a mis un like !
+        c.HasLiked = hasLikedCount > 0
         c.Date = string(cDate)
         comments = append(comments, c)
     }
@@ -135,7 +150,7 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     data := map[string]interface{}{
         "Topic":         t,
         "Comments":      comments,
-        "CurrentUserID": GetLoggedUserID(r),
+        "CurrentUserID": currentUserID,
     }
     RenderTemplate(w, "view_topic.html", data)
 }
