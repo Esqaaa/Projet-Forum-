@@ -12,7 +12,8 @@ import (
 )
 
 type TemplateData struct {
-	Error string
+	Error 		string
+	Identifier  string
 }
 
 func RenderTemplate(w http.ResponseWriter, tmpl string, data any) {
@@ -171,12 +172,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	).Scan(&id, &hashed)
 
 	if err != nil {
-
-		RenderTemplate(w, "login.html", TemplateData{
-			Error: "Identifiants invalides",
-		})
-		return
-	}
+        // erreur d'identifiant --> renvoie le texte tapé
+        RenderTemplate(w, "login.html", TemplateData{
+            Error:      "Identifiants invalides",
+            Identifier: identifier, 
+        })
+        return
+    }
 
 	// CHECK PASSWORD
 	err = bcrypt.CompareHashAndPassword(
@@ -185,12 +187,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-
-		RenderTemplate(w, "login.html", TemplateData{
-			Error: "Mot de passe incorrect",
-		})
-		return
-	}
+        // Mauvais mot de passe --> renvoie le texte tapé
+        RenderTemplate(w, "login.html", TemplateData{
+            Error:      "Mot de passe incorrect",
+            Identifier: identifier,
+        })
+        return
+    }
 
 	// COOKIE SESSION
 	http.SetCookie(w, &http.Cookie{
