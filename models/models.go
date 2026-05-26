@@ -30,5 +30,7 @@ type Comment struct {
     TopicID   int
     Author    string 
     Date      string
+	LikesCount int
+	HasLiked  bool
 }
 

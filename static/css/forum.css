@@ -65,3 +65,31 @@ body {
     font-family: inherit;
     font-size: 1rem;
 }
+
+.like-btn {
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Effet au survol : le cœur s'illumine en rouge */
+.like-btn:hover {
+    color: #ff4a4a !important;
+    transform: scale(1.1);
+}
+
+/* État quand l'utilisateur connecté a liké (cœur plein et rouge néon) */
+.like-btn.liked {
+    color: #ff4a4a !important;
+    text-shadow: 0 0 8px rgba(255, 74, 74, 0.4);
+}
+
+/* Le chiffre des likes reste blanc et lisible */
+.like-btn.liked .like-count {
+    color: white;
+    font-weight: bold;
+}

@@ -24,6 +24,7 @@ func main() {
 	http.HandleFunc("/message/edit", handlers.EditMessageHandler)
 	http.HandleFunc("/message/delete", handlers.DeleteMessageHandler)
 	http.HandleFunc("/topic/update-status", handlers.UpdateTopicStatusHandler)
+	http.HandleFunc("/message/like", handlers.LikeMessageHandler)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		// Si l'URL n'est pas exactement "/", on renvoie une erreur 404
