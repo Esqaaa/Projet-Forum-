@@ -101,7 +101,7 @@
                             <i class="fa-solid fa-pen"></i>
                         </button>
 
-                        {{if eq $.CurrentUserID $.Topic.AuthorID}}
+                        {{if or (eq $.CurrentUserID $.Topic.AuthorID) (eq $.CurrentUserID .AuthorID)}}
                         <a href="/message/delete?id={{.ID}}&topic_id={{$.Topic.ID}}"
                            onclick="return confirm('Supprimer ce message ?')"
                            style="color:#ff6363; text-decoration:none;">

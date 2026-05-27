@@ -28,7 +28,8 @@ type Comment struct {
     ID        int
     Content   string
     TopicID   int
-    Author    string 
+    Author    string
+	AuthorID  int 
     Date      string
 	LikesCount int
 	HasLiked  bool
