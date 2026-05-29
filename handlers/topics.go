@@ -205,23 +205,47 @@ func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
 // DeleteMessageHandler permet au proprio du topic de supprimer un message
 func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
     userID := GetLoggedUserID(r)
-    messageID := r.URL.Query().Get("id")
-    topicID := r.URL.Query().Get("topic_id")
-
-    // Vérifier si l'user est le proprio du TOPIC
-    var topicAuthorID int
-    query := `SELECT t.author_id FROM topics t 
-              JOIN messages m ON t.id = m.topic_id 
-              WHERE m.id = ?`
-    err := database.DB.QueryRow(query, messageID).Scan(&topicAuthorID)
-
-    if err != nil || userID != topicAuthorID {
-        http.Error(w, "Action non autorisée", http.StatusForbidden)
+    if userID == 0 {
+        http.Redirect(w, r, "/login", http.StatusSeeOther)
         return
     }
 
-    database.DB.Exec("DELETE FROM messages WHERE id = ?", messageID)
-    http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+    messageID := r.URL.Query().Get("id")
+    topicID := r.URL.Query().Get("topic_id")
+
+    // On vérifie qui est le propriétaire du TOPIC
+    var topicAuthorID int
+    topicQuery := `SELECT t.author_id FROM topics t 
+                   JOIN messages m ON t.id = m.topic_id 
+                   WHERE m.id = ?`
+    err := database.DB.QueryRow(topicQuery, messageID).Scan(&topicAuthorID)
+    if err != nil {
+        fmt.Println("Erreur recherche auteur topic:", err)
+        http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+        return
+    }
+
+    // On vérifie qui est l'auteur du MESSAGE lui-même
+    var messageAuthorID int
+    messageQuery := `SELECT author_id FROM messages WHERE id = ?`
+    err = database.DB.QueryRow(messageQuery, messageID).Scan(&messageAuthorID)
+    if err != nil {
+        fmt.Println("Erreur recherche auteur message:", err)
+        http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+        return
+    }
+
+    if userID == topicAuthorID || userID == messageAuthorID {
+        _, err = database.DB.Exec("DELETE FROM messages WHERE id = ?", messageID)
+        if err != nil {
+            fmt.Println("Erreur lors de la suppression en BDD:", err)
+        }
+        http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+        return
+    }
+
+    // Si aucun des deux cas ne correspond, on bloque l'accès
+    http.Error(w, "Action non autorisée", http.StatusForbidden)
 }
 
 func EditMessageHandler(w http.ResponseWriter, r *http.Request) {
