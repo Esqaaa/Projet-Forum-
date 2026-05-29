@@ -1,47 +1,125 @@
 package handlers
 
 import (
-	"forum/database"
-	"net/http"
+    "database/sql"
+    "fmt"
+    "forum/database"
+    "forum/models"
+    "net/http"
 )
 
-type Topic struct {
-	Title   string
-	Content string
-	Date    string
-}
-
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
+    if r.URL.Path != "/" {
+        http.Redirect(w, r, "/login", http.StatusSeeOther)
+        return
+    }
 
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		http.Redirect(w, r, "/login", 302)
-		return
-	}
+    currentUserID := GetLoggedUserID(r)
+    if currentUserID == 0 {
+        http.Redirect(w, r, "/login", http.StatusSeeOther)
+        return
+    }
 
-	_ = cookie
+    pageSize := 4
+    currentPage := 1
 
-	rows, err := database.DB.Query(
-		"SELECT title, content, created_at FROM topics ORDER BY created_at DESC",
-	)
+    pageStr := r.URL.Query().Get("page")
+    if pageStr != "" {
+        fmt.Sscanf(pageStr, "%d", &currentPage)
+    }
 
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	defer rows.Close()
+    if currentPage < 1 {
+        currentPage = 1
+    }
 
-	var topics []Topic
+    // Nombre total de topics
+    var totalTopics int
+    err := database.DB.QueryRow("SELECT COUNT(*) FROM topics").Scan(&totalTopics)
+    if err != nil {
+        totalTopics = 0
+    }
 
-	for rows.Next() {
-		var t Topic
-		var date string
+    totalPages := (totalTopics + pageSize - 1) / pageSize
+    if totalPages < 1 {
+        totalPages = 1
+    }
+    if currentPage > totalPages {
+        currentPage = totalPages
+    }
 
-		rows.Scan(&t.Title, &t.Content, &date)
-		t.Date = date
+    offset := (currentPage - 1) * pageSize
 
-		topics = append(topics, t)
-	}
+    rows, err := database.DB.Query(`
+        SELECT 
+            t.id,
+            t.title,
+            t.content,
+            t.created_at,
+            t.status,
+            t.is_pinned,
+            t.image_url,
+            u.username,
+            u.id
+        FROM topics t
+        JOIN users u ON t.author_id = u.id
+        ORDER BY t.is_pinned DESC, t.created_at DESC
+        LIMIT ? OFFSET ?`,
+        pageSize, offset)
 
-	RenderTemplate(w, "index.html", topics)
+    if err != nil {
+        http.Error(w, "Erreur récupération topics : "+err.Error(), 500)
+        return
+    }
+    defer rows.Close()
+
+    var topics []models.Topic
+
+    for rows.Next() {
+
+        var t models.Topic
+        var rawDate []byte
+        var imageURL sql.NullString
+
+        err := rows.Scan(
+            &t.ID,
+            &t.Title,
+            &t.Content,
+            &rawDate,
+            &t.Status,
+            &t.IsPinned,
+            &imageURL,
+            &t.Author,
+            &t.AuthorID,
+        )
+
+        if err != nil {
+            fmt.Println("Erreur scan topic:", err)
+            continue
+        }
+
+        if imageURL.Valid {
+            t.ImageURL = imageURL.String
+        } else {
+            t.ImageURL = ""
+        }
+
+        t.Date = string(rawDate)
+        t.CreatedAt = string(rawDate)
+
+        topics = append(topics, t)
+    }
+
+    data := map[string]interface{}{
+        "Topics":        topics,
+        "CurrentUserID": currentUserID,
+
+        "CurrentPage": currentPage,
+        "TotalPages":  totalPages,
+        "HasPrev":     currentPage > 1,
+        "HasNext":     currentPage < totalPages,
+        "PrevPage":    currentPage - 1,
+        "NextPage":    currentPage + 1,
+    }
+
+    RenderTemplate(w, "index.html", data)
 }

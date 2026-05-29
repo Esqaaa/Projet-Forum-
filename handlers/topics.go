@@ -74,7 +74,7 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 
 func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     topicID := r.URL.Query().Get("id")
-    currentUserID := GetLoggedUserID(r) // On récupère l'ID du visiteur connecté
+    currentUserID := GetLoggedUserID(r)
 
     var t models.Topic
     var rawDate []byte
