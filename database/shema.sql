@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS topics (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP, 
     author_id INT NOT NULL,
     is_pinned BOOLEAN DEFAULT 0,
-    image_url TEXT; 
+    category TEXT NOT NULL DEFAULT 'Général',
+    image_url TEXT, 
     status ENUM('ouvert', 'fermé', 'archivé') DEFAULT 'ouvert', 
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE 
 );

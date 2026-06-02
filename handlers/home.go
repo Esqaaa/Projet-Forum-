@@ -32,9 +32,16 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         currentPage = 1
     }
 
+    categoryFilter := r.URL.Query().Get("category")
+
     // Nombre total de topics
     var totalTopics int
-    err := database.DB.QueryRow("SELECT COUNT(*) FROM topics").Scan(&totalTopics)
+    var err error 
+    if categoryFilter != "" {
+        err = database.DB.QueryRow("SELECT COUNT(*) FROM topics WHERE category = ?", categoryFilter).Scan(&totalTopics)
+    } else {
+        err = database.DB.QueryRow("SELECT COUNT(*) FROM topics").Scan(&totalTopics)
+    }
     if err != nil {
         totalTopics = 0
     }
@@ -49,22 +56,24 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
     offset := (currentPage - 1) * pageSize
 
-    rows, err := database.DB.Query(`
+    queryStr := `
         SELECT 
-            t.id,
-            t.title,
-            t.content,
-            t.created_at,
-            t.status,
-            t.is_pinned,
-            t.image_url,
-            u.username,
-            u.id
+            t.id, t.title, t.content, t.created_at, t.status, 
+            t.is_pinned, t.image_url, t.category, u.username, u.id
         FROM topics t
-        JOIN users u ON t.author_id = u.id
-        ORDER BY t.is_pinned DESC, t.created_at DESC
-        LIMIT ? OFFSET ?`,
-        pageSize, offset)
+        JOIN users u ON t.author_id = u.id `
+
+    var rows *sql.Rows
+    if categoryFilter != "" {
+        queryStr += `WHERE t.category = ? 
+                     ORDER BY t.is_pinned DESC, t.created_at DESC 
+                     LIMIT ? OFFSET ?`
+        rows, err = database.DB.Query(queryStr, categoryFilter, pageSize, offset)
+    } else {
+        queryStr += `ORDER BY t.is_pinned DESC, t.created_at DESC 
+                     LIMIT ? OFFSET ?`
+        rows, err = database.DB.Query(queryStr, pageSize, offset)
+    }
 
     if err != nil {
         http.Error(w, "Erreur récupération topics : "+err.Error(), 500)
@@ -73,25 +82,15 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
     defer rows.Close()
 
     var topics []models.Topic
-
     for rows.Next() {
-
         var t models.Topic
         var rawDate []byte
         var imageURL sql.NullString
 
         err := rows.Scan(
-            &t.ID,
-            &t.Title,
-            &t.Content,
-            &rawDate,
-            &t.Status,
-            &t.IsPinned,
-            &imageURL,
-            &t.Author,
-            &t.AuthorID,
+            &t.ID, &t.Title, &t.Content, &rawDate, &t.Status,
+            &t.IsPinned, &imageURL, &t.Category, &t.Author, &t.AuthorID,
         )
-
         if err != nil {
             fmt.Println("Erreur scan topic:", err)
             continue
@@ -105,20 +104,25 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
         t.Date = string(rawDate)
         t.CreatedAt = string(rawDate)
-
         topics = append(topics, t)
     }
+
+    categories := []string{"Sport", "Musique", "Automobile", "Aviation", "Sciences", "Informatique"}
+    
+
+    
 
     data := map[string]interface{}{
         "Topics":        topics,
         "CurrentUserID": currentUserID,
-
         "CurrentPage": currentPage,
         "TotalPages":  totalPages,
         "HasPrev":     currentPage > 1,
         "HasNext":     currentPage < totalPages,
         "PrevPage":    currentPage - 1,
         "NextPage":    currentPage + 1,
+        "SelectedCategory": categoryFilter,
+        "Categories": categories,
     }
 
     RenderTemplate(w, "index.html", data)

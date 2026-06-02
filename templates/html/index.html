@@ -6,9 +6,20 @@
 
 <div class="container">
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h1>Derniers Topics</h1>
         <a href="/topic/create" class="btn-main">Créer un sujet</a>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+        <a href="/" style="text-decoration: none; font-size: 0.85rem; padding: 6px 12px; border-radius: 20px; border: 1px solid #bc84ee; {{if eq .SelectedCategory ""}}background: #bc84ee; color: black; font-weight: bold;{{else}}color: #bc84ee;{{end}}">
+            Tout voir
+        </a>
+        {{range .Categories}}
+        <a href="/?category={{.}}" style="text-decoration: none; font-size: 0.85rem; padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); {{if eq $.SelectedCategory .}}background: white; color: black; font-weight: bold; border-color: white;{{else}}color: white; opacity: 0.8;{{end}}">
+            {{.}}
+        </a>
+        {{end}}
     </div>
 
     <div class="topics-list">
@@ -35,6 +46,10 @@
                         {{end}}
 
                         {{.Title}}
+
+                        <span style="font-size: 0.75rem; font-weight: normal; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; color: #fff; margin-left: 10px; vertical-align: middle; border: 1px solid rgba(255,255,255,0.1);">
+                            {{.Category}}
+                        </span>
                     </h3>
 
                     <p style="margin-bottom: 15px;">{{.Content}}</p>
@@ -50,7 +65,7 @@
         </div>
         {{else}}
 
-        <p style="text-align: center; opacity: 0.5;">Aucun sujet pour le moment...</p>
+        <p style="text-align: center; opacity: 0.5;">Aucun sujet dans cette catégorie pour le moment...</p>
 
         {{end}}
 
@@ -60,7 +75,7 @@
     <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 40px; font-size: 0.9rem;">
 
         {{if .HasPrev}}
-        <a href="/?page={{.PrevPage}}" 
+        <a href="/?page={{.PrevPage}}{{if .SelectedCategory}}&category={{.SelectedCategory}}{{end}}" 
            style="color: #6384ff; text-decoration: none; padding: 8px 16px; border: 1px solid rgba(99, 132, 255, 0.3); border-radius: 5px; background: rgba(99, 132, 255, 0.05);">
             <i class="fa-solid fa-chevron-left"></i> Précédent
         </a>
@@ -75,7 +90,7 @@
         </span>
 
         {{if .HasNext}}
-        <a href="/?page={{.NextPage}}" 
+        <a href="/?page={{.NextPage}}{{if .SelectedCategory}}&category={{.SelectedCategory}}{{end}}" 
            style="color: #6384ff; text-decoration: none; padding: 8px 16px; border: 1px solid rgba(99, 132, 255, 0.3); border-radius: 5px; background: rgba(99, 132, 255, 0.05);">
             Suivant <i class="fa-solid fa-chevron-right"></i>
         </a>

@@ -43,6 +43,11 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 
         title := r.FormValue("title")
         content := r.FormValue("content")
+        category := r.FormValue("category")
+        if category == "" {
+            category = "Général"
+        }
+
         var imagePath string
 
         file, handler, err := r.FormFile("image")
@@ -59,8 +64,8 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
             io.Copy(dst, file)
         }
 
-        query := "INSERT INTO topics (title, content, author_id, status, image_url) VALUES (?, ?, ?, ?, ?)"
-        _, err = database.DB.Exec(query, title, content, userID, "ouvert", imagePath)
+        query := "INSERT INTO topics (title, content, author_id, status, image_url, category) VALUES (?, ?, ?, ?, ?, ?)"
+        _, err = database.DB.Exec(query, title, content, userID, "ouvert", imagePath, category)
         
         if err != nil {
             http.Error(w, "Erreur création : "+err.Error(), 500)
@@ -81,7 +86,7 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     var imageURL sql.NullString
 
     query := `
-        SELECT t.id, t.title, t.content, t.status, t.is_pinned, t.created_at, u.username, t.author_id, t.image_url
+        SELECT t.id, t.title, t.content, t.status, t.is_pinned, t.created_at, t.category, u.username, t.author_id, t.image_url
         FROM topics t
         JOIN users u ON t.author_id = u.id
         WHERE t.id = ?`
@@ -92,7 +97,8 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
         &t.Content, 
         &t.Status, 
         &t.IsPinned, 
-        &rawDate, 
+        &rawDate,
+        &t.Category, 
         &t.Author,
         &t.AuthorID,
         &imageURL,

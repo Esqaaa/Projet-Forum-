@@ -16,13 +16,17 @@
                     {{if eq .Topic.Status "fermé"}}<i class="fa-solid fa-lock" style="font-size: 1.2rem; margin-right: 10px;"></i>{{end}}{{.Topic.Title}}
                 </h1>
 
-                <div style="display:flex; gap:15px; font-size:0.8rem; opacity:0.5;">
+                <div style="display:flex; gap:15px; font-size:0.8rem; opacity:0.5; align-items: center;">
                     <span>Par <strong>{{.Topic.Author}}</strong></span>
                     <span>•</span>
                     <span>Le {{.Topic.CreatedAt}}</span>
                     <span>•</span>
                     <span style="text-transform:capitalize;">
                         Statut : <strong>{{.Topic.Status}}</strong>
+                    </span>
+                    <span>•</span>
+                    <span>
+                        Catégorie : <strong style="color: #6384ff; background: rgba(99, 132, 255, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(99, 132, 255, 0.2);">{{.Topic.Category}}</strong>
                     </span>
                 </div>
             </div>
@@ -82,7 +86,7 @@
             </h3>
 
             {{range .Comments}}
-            <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:8px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.05); position:relative;">
+            <div style="background:rgba(255,255,255,0.03); padding:166px; padding:16px; border-radius:8px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.05); position:relative;">
                 
                 <div style="display:flex; justify-content:space-between; font-size:0.8rem; opacity:0.6; margin-bottom:10px;">
                     <div>

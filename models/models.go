@@ -12,6 +12,7 @@ type Topic struct {
 	AuthorID 	int 		// ID de l'auteur du topic
 	Author      string      // Nom de l'auteur du topic
 	IsPinned 	bool		// Si un post est épinglé
+	Category	string 		// Le thème du topic 
 	ImageURL	string 		// Ajouter une image au post  
 	Status 		string 		// Statut du topic (ex: "Ouvert", "Fermé", "Archivé")
 }
