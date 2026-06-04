@@ -25,18 +25,28 @@
         </div>
     </div>
 
-    <div class="image-upload">
-            <label for="image">
-                <i class="fa-solid fa-image"></i> Ajouter une image (Optionnel)
+    <div class="image-section-wrapper">
+        <div class="image-upload">
+            <label for="image" class="upload-btn">
+                <i class="fa-solid fa-image icon-upload"></i>
+                <span>Ajouter une image (Optionnel)</span>
             </label>
-            <input class="image-upload" type="file" id="image" name="image" accept="image/*" style="display: none;">
+            <input type="file" id="image" name="image" accept="image/*" style="display: none;">
         </div>
 
-        <div class="input-group textarea-group">
-            <textarea name="content" placeholder="Contenu de votre message..." rows="8" ></textarea>
+        <div id="preview-container">
+            <img id="preview" src="" alt="Aperçu">
+            <button type="button" id="removeImage"><i class="fa-solid fa-trash"></i></button>
         </div>
+    </div>
+    
+    <div class="input-group textarea-group">
+        <textarea name="content" placeholder="Contenu de votre message..." rows="8" ></textarea>
+    </div>
 
-        <button type="submit">Publier</button>
-        <a href="/" style="display: block; text-align: center; margin-top: 15px; color: white; text-decoration: none; opacity: 0.7;">Annuler</a>
+    <button type="submit">Publier</button>
+    <a href="/" style="display: block; text-align: center; margin-top: 15px; color: white; text-decoration: none; opacity: 0.7;">Annuler</a>
+    <script src="../../static/js/script_picture.js"></script>
 </form>
+    
 {{end}}
