@@ -74,7 +74,6 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
         http.Redirect(w, r, "/", http.StatusSeeOther)
         return 
     }
-
 }
 
 func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
@@ -119,8 +118,6 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     t.CreatedAt = string(rawDate)
     t.Date = string(rawDate)
 
-    // On compte le total des likes pour chaque message,
-    // et on regarde si l'utilisateur actuellement connecté (currentUserID) a mis un like ou pas.
     rows, err := database.DB.Query(`
         SELECT m.id, m.content, m.created_at, u.username,
                (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id) AS likes_count,
@@ -138,16 +135,14 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     for rows != nil && rows.Next() {
         var c models.Comment
         var cDate []byte
-        var hasLikedCount int // Variable temporaire pour intercepter le COUNT (0 ou 1)
+        var hasLikedCount int 
 
-        // Ajout des deux nouvelles colonnes dans le Scan
         err = rows.Scan(&c.ID, &c.Content, &cDate, &c.Author, &c.LikesCount, &hasLikedCount)
         if err != nil {
             fmt.Println("Erreur Scan message:", err)
             continue
         }
 
-        // Si le COUNT de has_liked est supérieur à 0, ça veut dire que le visiteur a mis un like !
         c.HasLiked = hasLikedCount > 0
         c.Date = string(cDate)
         comments = append(comments, c)
@@ -190,8 +185,6 @@ func PostMessageHandler(w http.ResponseWriter, r *http.Request) {
     http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
 }
 
-
-// DeleteTopicHandler supprime un topic et ses messages (grâce au ON DELETE CASCADE en SQL)
 func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
     userID := GetLoggedUserID(r)
     topicID := r.URL.Query().Get("id")
@@ -208,7 +201,6 @@ func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
     http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-// DeleteMessageHandler permet au proprio du topic de supprimer un message
 func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
     userID := GetLoggedUserID(r)
     if userID == 0 {
@@ -219,7 +211,6 @@ func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
     messageID := r.URL.Query().Get("id")
     topicID := r.URL.Query().Get("topic_id")
 
-    // On vérifie qui est le propriétaire du TOPIC
     var topicAuthorID int
     topicQuery := `SELECT t.author_id FROM topics t 
                    JOIN messages m ON t.id = m.topic_id 
@@ -231,7 +222,6 @@ func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // On vérifie qui est l'auteur du MESSAGE lui-même
     var messageAuthorID int
     messageQuery := `SELECT author_id FROM messages WHERE id = ?`
     err = database.DB.QueryRow(messageQuery, messageID).Scan(&messageAuthorID)
@@ -250,7 +240,6 @@ func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Si aucun des deux cas ne correspond, on bloque l'accès
     http.Error(w, "Action non autorisée", http.StatusForbidden)
 }
 
@@ -267,7 +256,7 @@ func EditMessageHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     messageID := r.FormValue("message_id")
-    topicID := r.FormValue("topic_id") // Récupère le champ que l'on vient d'ajouter
+    topicID := r.FormValue("topic_id") 
     newContent := r.FormValue("content")
 
     if newContent == "" {
@@ -275,7 +264,6 @@ func EditMessageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Vérification de sécurité : l'utilisateur est-il l'auteur du message ?
     var commentAuthorID int
     query := "SELECT author_id FROM messages WHERE id = ?"
     err := database.DB.QueryRow(query, messageID).Scan(&commentAuthorID)
@@ -289,18 +277,15 @@ func EditMessageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Mise à jour de la BDD
     _, err = database.DB.Exec("UPDATE messages SET content = ? WHERE id = ?", newContent, messageID)
     if err != nil {
         http.Error(w, "Erreur BDD", 500)
         return
     }
 
-    // Redirection propre vers la page du topic mis à jour !
     http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
 }
 
-// UpdateMessageHandler permet à l'auteur d'un commentaire de le modifier
 func UpdateMessageHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method != http.MethodPost {
         http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -322,7 +307,6 @@ func UpdateMessageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Sécurité : On vérifie si l'utilisateur actuel est bien l'auteur du MESSAGE
     var commentAuthorID int
     query := "SELECT author_id FROM messages WHERE id = ?"
     err := database.DB.QueryRow(query, messageID).Scan(&commentAuthorID)
@@ -337,23 +321,20 @@ func UpdateMessageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Si tout est OK, on met à jour en BDD
     _, err = database.DB.Exec("UPDATE messages SET content = ? WHERE id = ?", newContent, messageID)
     if err != nil {
         http.Error(w, "Erreur lors de la mise à jour du message : "+err.Error(), 500)
         return
     }
 
-    // Redirection vers le topic
     http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
 }
 
 func UpdateTopicStatusHandler(w http.ResponseWriter, r *http.Request) {
     userID := GetLoggedUserID(r)
     topicID := r.URL.Query().Get("id")
-    newStatus := r.URL.Query().Get("status") // On récupère le statut souhaité : ouvert, fermé ou archivé
+    newStatus := r.URL.Query().Get("status") 
 
-    // Vérification de sécurité (Propriétaire ?)
     var authorID int
     err := database.DB.QueryRow("SELECT author_id FROM topics WHERE id = ?", topicID).Scan(&authorID)
     
@@ -362,14 +343,12 @@ func UpdateTopicStatusHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Validation du statut pour éviter n'importe quoi en BDD
     validStatuses := map[string]bool{"ouvert": true, "fermé": true, "archivé": true}
     if !validStatuses[newStatus] {
         http.Error(w, "Statut invalide", http.StatusBadRequest)
         return
     }
 
-    // Mise à jour
     _, err = database.DB.Exec("UPDATE topics SET status = ? WHERE id = ?", newStatus, topicID)
     if err != nil {
         http.Error(w, "Erreur BDD", 500)
@@ -378,8 +357,7 @@ func UpdateTopicStatusHandler(w http.ResponseWriter, r *http.Request) {
 
     http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
 }
-
-// Epingler un topic 
+ 
 func PinTopicHandler(w http.ResponseWriter, r *http.Request) {
     userID := GetLoggedUserID(r)
     topicID := r.URL.Query().Get("id")

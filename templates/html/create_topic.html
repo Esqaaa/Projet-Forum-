@@ -5,36 +5,38 @@
 <form method="POST" action="/topic/create" enctype="multipart/form-data" class="large-form">
     <h1>NOUVEAU SUJET</h1>
 
-    <div class="input-group">
-        <i class="fa-solid fa-heading icon"></i>
-        <input type="text" name="title" placeholder="Titre du topic" required>
-    </div>
+    <div class="row-flex">
+        <div class="input-group half">
+            <i class="fa-solid fa-heading icon"></i>
+            <input type="text" name="title" placeholder="Titre du topic" required>
+        </div>
 
-    <div class="input-group">
-        <i class="fa-solid fa-tags icon"></i>
-        <select name="category" required style="width: 100%; background: transparent; border: none; color: white; padding: 10px 5px; outline: none; font-size: 16px;">
-            <option value="" disabled selected style="background-color: #222; color: #aaa;"></option>
-            <option value="Sport" style="background-color: #222; color: white;">Sport</option>
-            <option value="Musique" style="background-color: #222; color: white;">Musique</option>
-            <option value="Automobile" style="background-color: #222; color: white;">Automobile</option>
-            <option value="Aviation" style="background-color: #222; color: white;">Aviation</option>
-            <option value="Science" style="background-color: #222; color: white;">Science</option>
-            <option value="Informatique" style="background-color: #222; color: white;">Informatique</option>
-        </select>
+        <div class="input-group half">
+            <i class="fa-solid fa-tags icon"></i>
+            <select name="category" required class="selection">
+                <option value="" disabled selected>Choix catégorie</option>
+                <option value="Sport">Sport</option>
+                <option value="Musique">Musique</option>
+                <option value="Automobile">Automobile</option>
+                <option value="Aviation">Aviation</option>
+                <option value="Science">Science</option>
+                <option value="Informatique">Informatique</option>
+            </select>
+        </div>
     </div>
 
     <div class="image-upload">
-        <label for="image">
-            <i class="fa-solid fa-image"></i> Ajouter une image (Optionnel)
-        </label>
-        <input class="image-upload" type="file" id="image" name="image" accept="image/*" style="display: none;">
-    </div>
+            <label for="image">
+                <i class="fa-solid fa-image"></i> Ajouter une image (Optionnel)
+            </label>
+            <input class="image-upload" type="file" id="image" name="image" accept="image/*" style="display: none;">
+        </div>
 
-    <div class="input-group textarea-group">
-        <textarea name="content" placeholder="Contenu de votre message..." rows="8" ></textarea>
-    </div>
+        <div class="input-group textarea-group">
+            <textarea name="content" placeholder="Contenu de votre message..." rows="8" ></textarea>
+        </div>
 
-    <button type="submit">Publier</button>
-    <a href="/" style="display: block; text-align: center; margin-top: 15px; color: white; text-decoration: none; opacity: 0.7;">Annuler</a>
+        <button type="submit">Publier</button>
+        <a href="/" style="display: block; text-align: center; margin-top: 15px; color: white; text-decoration: none; opacity: 0.7;">Annuler</a>
 </form>
 {{end}}

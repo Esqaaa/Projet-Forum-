@@ -181,6 +181,73 @@ a:hover {
     font-size: 16px !important;
 }
 
+/* --- ALIGNEMENT DES CHAMPS EN CÔTE À CÔTÉ --- */
+.row-flex {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    align-items: center;
+}
+
+/* Le champ Titre prend tout l'espace */
+.row-flex .half:first-child {
+    flex: 1;
+}
+
+/* Le champ Catégorie a une largeur fixe */
+.row-flex .half:last-child {
+    position: relative;
+    width: 220px;
+    flex-shrink: 0;
+}
+
+/* --- STYLE DU SELECT (harmonisé avec l'input) --- */
+.row-flex .input-group select.selection {
+    width: 100%;
+    padding: 15px 40px 15px 50px; /* espace pour l'icône + flèche */
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.92);
+    color: #333;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+
+/* Flèche personnalisée */
+.row-flex .half:last-child::after {
+    content: "\f0d7";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #5a78ff;
+    pointer-events: none;
+}
+
+/* Effet focus */
+.row-flex .input-group select.selection:focus {
+    background: white;
+    box-shadow: 0 0 0 2px #5a78ff;
+}
+
+/* Options du menu déroulant */
+.selection option {
+    background-color: white;
+    color: #333;
+}
+
+.selection option[disabled] {
+    color: #aaa;
+}
+
+
 @keyframes popupFade {
     from {
         opacity: 0;

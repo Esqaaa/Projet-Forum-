@@ -17,7 +17,6 @@ type TemplateData struct {
 }
 
 func RenderTemplate(w http.ResponseWriter, tmpl string, data any) {
-
 	t, err := template.ParseFiles(
 		"templates/html/layout.html",
 		"templates/html/"+tmpl,
@@ -36,8 +35,6 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, data any) {
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-
-	// AFFICHAGE
 	if r.Method == "GET" {
 		RenderTemplate(w, "register.html", nil)
 		return
@@ -68,7 +65,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// VERIF USERNAME EXISTE
+	// VERIFICATION USERNAME EXISTE
 	var tmp int
 
 	err := database.DB.QueryRow(
@@ -92,7 +89,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// VERIF EMAIL EXISTE
+	// VERIFICATION EMAIL EXISTE
 	err = database.DB.QueryRow(
 		"SELECT id FROM users WHERE email = ?",
 		email,
@@ -128,7 +125,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// INSERT USER DANS TABLE 
 	_, err = database.DB.Exec(
 		"INSERT INTO users(username, email, password) VALUES (?, ?, ?)",
 		username,
@@ -144,13 +140,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// REDIRECTION LOGIN
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-
-	// AFFICHAGE PAGE
 	if r.Method == "GET" {
 		RenderTemplate(w, "login.html", nil)
 		return
@@ -172,7 +165,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	).Scan(&id, &hashed)
 
 	if err != nil {
-        // erreur d'identifiant --> renvoie le texte tapé
         RenderTemplate(w, "login.html", TemplateData{
             Error:      "Identifiants invalides",
             Identifier: identifier, 
@@ -187,7 +179,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-        // Mauvais mot de passe --> renvoie le texte tapé
         RenderTemplate(w, "login.html", TemplateData{
             Error:      "Mot de passe incorrect",
             Identifier: identifier,
@@ -202,12 +193,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Path:  "/",
 	})
 
-	// REDIRECTION ACCUEIL
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-
 	http.SetCookie(w, &http.Cookie{
 		Name:   "session",
 		Value:  "",
@@ -219,7 +208,6 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ValidatePassword(password string) error {
-
 	if len(password) < 8 {
 		return errors.New("8 caractères minimum")
 	}

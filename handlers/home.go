@@ -34,7 +34,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
     categoryFilter := r.URL.Query().Get("category")
 
-    // Nombre total de topics
     var totalTopics int
     var err error 
     if categoryFilter != "" {
@@ -109,9 +108,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
     categories := []string{"Sport", "Musique", "Automobile", "Aviation", "Sciences", "Informatique"}
     
-
-    
-
     data := map[string]interface{}{
         "Topics":        topics,
         "CurrentUserID": currentUserID,
