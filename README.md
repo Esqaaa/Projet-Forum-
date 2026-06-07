@@ -51,7 +51,7 @@ Le site est désormais accessible localement sur votre navigateur (généralemen
 │   main.go
 │   README.md
 │   
-├───database
+├─── database
 │       01_users.sql
 │       02_topics.sql
 │       03_messages.sql
@@ -60,33 +60,33 @@ Le site est désormais accessible localement sur votre navigateur (généralemen
 │       init.go
 │       shema.sql
 │       
-├───handlers
+├─── handlers
 │       admin.go
 │       auth.go
 │       home.go
 │       likes.go
 │       topics.go
 │       
-├───models
+├─── models
 │       models.go
 │       user.go
 │       
-├───static
-│   ├───css
-│   │       admin.css
-│   │       forum.css
-│   │       styles_login.css
-│   │       topic.css
-│   │       
-│   ├───js
-│   │       script_picture.js
-│   │       toggle_edit.js
-│   │       
-│   └───uploads
+├─── static
+│    ├─── css
+│    │       admin.css
+│    │       forum.css
+│    │       styles_login.css
+│    │       topic.css
+│    │       
+│    ├─── js
+│    │       script_picture.js
+│    │       toggle_edit.js
+│    │       
+│    └─── uploads
 │           
-└───templates
-    │   
-    └───html
+└─── templates
+     │   
+     └─── html
             admin_dashboard.html
             create_topic.html
             index.html
@@ -95,9 +95,9 @@ Le site est désormais accessible localement sur votre navigateur (généralemen
             register.html
             view_topic.html
 ```
-🛣️ Liste des Routes (Routing)
+## 🛣️ Liste des Routes (Routing)
 Conformément aux exigences, voici la séparation des routes de l'application:
-👁️ Routes Distribuant une Vue (HTML)
+### 👁️ Routes Distribuant une Vue (HTML)
 - GET / : Page d'accueil (Liste des topics)   
 - GET /login : Page de connexion   
 - GET /register : Page d'inscription   
@@ -113,8 +113,8 @@ Conformément aux exigences, voici la séparation des routes de l'application:
 - POST /like : Gestion des likes et dislikes sur les messages   
 - POST /admin/action : Actions de modération (Bannissement, suppression, modification d'état)   
 
-##⚡ Méthodologie & Usage de l'IA (Vibe Coding)
-Pour ce projet, nous avons adopté une approche moderne de Vibe Coding en collaborant activement avec des Intelligences Artificielles de pointe : Copilot, Gemini et ChatGPT.
+## ⚡ Méthodologie & Usage de l'IA (Vibe Coding)
+Pour ce projet, nous avons adopté une approche moderne de Vibe Coding en collaborant activement avec des Intelligences Artificielles de pointe : *Copilot, Gemini et ChatGPT*.
 
 Rôle des IA : Elles ont agi comme des copilotes de programmation (Pair Programming). Elles nous ont aidés à générer rapidement des structures de données en Go, à concevoir les schémas SQL complexes, et à automatiser les tâches répétitives sur le CSS.
 
