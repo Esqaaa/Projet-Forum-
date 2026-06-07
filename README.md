@@ -1,27 +1,27 @@
 # 🏛️ PROJET FORUM - YNOV CAMPUS
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Backend-Golang-00ADD8?style=for-the-badge&logo=go&logoColor=white" alt="Go">
-  <img src="https://img.shields.io/badge/Database-MariaDB%20%2F%20XAMPP-003545?style=for-the-badge&logo=mariadb&logoColor=white" alt="MariaDB">
-  <img src="https://img.shields.io/badge/Frontend-HTML5%20%2F%20CSS3-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML/CSS">
-  <img src="https://img.shields.io/badge/Script-JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JS">
+    <img src="https://img.shields.io/badge/Backend-Golang-00ADD8?style=for-the-badge&logo=go&logoColor=white" alt="Go" style="zoom:60%;">
+    <img src="https://img.shields.io/badge/Database-MariaDB%20%2F%20XAMPP-003545?style=for-the-badge&logo=mariadb&logoColor=white" alt="MariaDB" style="zoom:60%;">
+    <img src="https://img.shields.io/badge/Frontend-HTML5%20%2F%20CSS3-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML/CSS" style="zoom:60%;">
+    <img src="https://img.shields.io/badge/Script-JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JS" style="zoom:60%;">
 </p>
 
 ---
 
 ## 📝 Présentation du Projet
-[cite_start]Ce projet consiste en la création d'une plateforme de forum web complète, développée par les étudiants dans le cadre de la formation Ynov Campus[cite: 1, 2]. [cite_start]Il permet aux utilisateurs de créer des comptes, d'ouvrir des discussions (topics), d'échanger des messages, et d'interagir via un système de likes/dislikes[cite: 5, 15, 30, 37]. 
+Ce projet consiste en la création d'une plateforme de forum web complète, développée par les étudiants dans le cadre de la formation Ynov Campus. Il permet aux utilisateurs de créer un compte, d'ouvrir des discussions (topics), d'échanger des messages, et d'interagir via un système de likes/dislikes. 
 
-[cite_start]L'accent a été mis sur la robustesse du code, l'interdiction de frameworks front-end[cite: 80], et une **gestion des erreurs optimale** à chaque étape du cycle de requêtes.
+L'accent a été mis sur la robustesse du code, l'interdiction de frameworks front-end, et une **gestion des erreurs optimale** à chaque étape du cycle de requêtes.
 
 ---
 
 ## 🛠️ Stack Technique
 
-* [cite_start]**Backend :** Golang (Natif, aucun framework lourd) [cite: 80, 81]
-* [cite_start]**Frontend :** HTML5 / CSS3 pour les templates (Conforme à la consistance "No-Front-Framework") [cite: 80]
+* **Backend :** Golang (Natif, aucun framework lourd)
+* **Frontend :** HTML / CSS pour les templates
 * **Dynamisme Front :** JavaScript (Utilisé spécifiquement pour le rafraîchissement des cookies et l'interactivité fluide)
-* [cite_start]**Base de données :** MariaDB (Via le SGBDR requis compatible MySQL) [cite: 84]
+* **Base de données :** MariaDB
 * **Environnement Local :** XAMPP (Hébergement de la base de données)
 
 ---
@@ -42,7 +42,7 @@ Ouvrez votre terminal à la racine du projet et exécutez la commande suivante :
 
 ```bash
 go run .
-
+```
 Le site est désormais accessible localement sur votre navigateur (généralement à l'adresse http://localhost:8080).
 
 📁 Arborescence du Projet
