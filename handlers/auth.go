@@ -4,9 +4,9 @@ import (
     "database/sql"
     "errors"
     "forum/database"
-    "html/template"
     "net/http"
     "regexp"
+    "html/template"
 
     "golang.org/x/crypto/bcrypt"
 )
@@ -18,12 +18,20 @@ type TemplateData struct {
     Email      string
 }
 
-func RenderTemplate(w http.ResponseWriter, tmpl string, data any) {
+func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, data map[string]interface{}) {
+    // Récupérer l'utilisateur connecté
+    user, _ := GetLoggedUser(r)
+
+    if data == nil {
+        data = map[string]interface{}{}
+    }
+
+    data["User"] = user
+
     t, err := template.ParseFiles(
         "templates/html/layout.html",
         "templates/html/"+tmpl,
     )
-
     if err != nil {
         http.Error(w, err.Error(), 500)
         return
@@ -38,7 +46,7 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, data any) {
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method == "GET" {
-        RenderTemplate(w, "register.html", nil)
+        RenderTemplate(w, r, "register.html", nil)
         return
     }
 
@@ -50,34 +58,29 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
     var errorsList []string
 
-    // VALIDATION USERNAME
     usernameRegex := regexp.MustCompile(`^[a-zA-Z0-9]+$`)
     if !usernameRegex.MatchString(username) {
         errorsList = append(errorsList, "Pseudo invalide")
     }
 
-    // VALIDATION EMAIL
     emailRegex := regexp.MustCompile(`^[^@]+@[^@]+\.[^@]+$`)
     if !emailRegex.MatchString(email) {
         errorsList = append(errorsList, "Email invalide")
     }
 
-    // VALIDATION PASSWORD
     if err := ValidatePassword(password); err != nil {
         errorsList = append(errorsList, err.Error())
     }
 
-    // SI ERREURS → AFFICHER
     if len(errorsList) > 0 {
-        RenderTemplate(w, "register.html", TemplateData{
-            Errors:   errorsList,
-            Username: username,
-            Email:    email,
+        RenderTemplate(w, r, "register.html", map[string]interface{}{
+            "Errors":   errorsList,
+            "Username": username,
+            "Email":    email,
         })
         return
     }
 
-    // VERIFICATION USERNAME EXISTE
     var tmp int
     err := database.DB.QueryRow(
         "SELECT id FROM users WHERE username = ?",
@@ -85,54 +88,52 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
     ).Scan(&tmp)
 
     if err == nil {
-        RenderTemplate(w, "register.html", TemplateData{
-            Errors:   []string{"Pseudo déjà utilisé"},
-            Username: username,
-            Email:    email,
+        RenderTemplate(w, r, "register.html", map[string]interface{}{
+            "Errors":   []string{"Pseudo déjà utilisé"},
+            "Username": username,
+            "Email":    email,
         })
         return
     }
 
     if err != sql.ErrNoRows {
-        RenderTemplate(w, "register.html", TemplateData{
-            Errors:   []string{"Erreur serveur DB"},
-            Username: username,
-            Email:    email,
+        RenderTemplate(w, r, "register.html", map[string]interface{}{
+            "Errors":   []string{"Erreur serveur DB"},
+            "Username": username,
+            "Email":    email,
         })
         return
     }
 
-    // VERIFICATION EMAIL EXISTE
     err = database.DB.QueryRow(
         "SELECT id FROM users WHERE email = ?",
         email,
     ).Scan(&tmp)
 
     if err == nil {
-        RenderTemplate(w, "register.html", TemplateData{
-            Errors:   []string{"Email déjà utilisé"},
-            Username: username,
-            Email:    email,
+        RenderTemplate(w, r, "register.html", map[string]interface{}{
+            "Errors":   []string{"Email déjà utilisé"},
+            "Username": username,
+            "Email":    email,
         })
         return
     }
 
     if err != sql.ErrNoRows {
-        RenderTemplate(w, "register.html", TemplateData{
-            Errors:   []string{"Erreur serveur DB"},
-            Username: username,
-            Email:    email,
+        RenderTemplate(w, r, "register.html", map[string]interface{}{
+            "Errors":   []string{"Erreur serveur DB"},
+            "Username": username,
+            "Email":    email,
         })
         return
     }
 
-    // HASH PASSWORD
     hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
     if err != nil {
-        RenderTemplate(w, "register.html", TemplateData{
-            Errors:   []string{"Erreur hash password"},
-            Username: username,
-            Email:    email,
+        RenderTemplate(w, r, "register.html", map[string]interface{}{
+            "Errors":   []string{"Erreur hash password"},
+            "Username": username,
+            "Email":    email,
         })
         return
     }
@@ -145,10 +146,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
     )
 
     if err != nil {
-        RenderTemplate(w, "register.html", TemplateData{
-            Errors:   []string{"Erreur insertion utilisateur"},
-            Username: username,
-            Email:    email,
+        RenderTemplate(w, r, "register.html", map[string]interface{}{
+            "Errors":   []string{"Erreur insertion utilisateur"},
+            "Username": username,
+            "Email":    email,
         })
         return
     }
@@ -158,7 +159,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method == "GET" {
-        RenderTemplate(w, "login.html", nil)
+        RenderTemplate(w, r, "login.html", nil)
         return
     }
 
@@ -177,18 +178,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     ).Scan(&id, &hashed)
 
     if err != nil {
-        RenderTemplate(w, "login.html", TemplateData{
-            Errors:     []string{"Identifiants invalides"},
-            Identifier: identifier,
+        RenderTemplate(w, r, "login.html", map[string]interface{}{
+            "Errors":     []string{"Identifiants invalides"},
+            "Identifier": identifier,
         })
         return
     }
 
     err = bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password))
     if err != nil {
-        RenderTemplate(w, "login.html", TemplateData{
-            Errors:     []string{"Mot de passe incorrect"},
-            Identifier: identifier,
+        RenderTemplate(w, r, "login.html", map[string]interface{}{
+            "Errors":     []string{"Mot de passe incorrect"},
+            "Identifier": identifier,
         })
         return
     }

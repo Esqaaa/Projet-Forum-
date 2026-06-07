@@ -123,6 +123,14 @@ a:hover {
     animation: popupFade 0.4s ease;
 }
 
+.selection {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: none !important;
+}
+
+
 .textarea-group {
     background: rgba(255,255,255,0.92);
     border-radius: 10px;
@@ -137,7 +145,7 @@ a:hover {
     font-size: 16px;
     font-family: inherit;
     outline: none;
-    resize: vertical;
+    resize: none;
     min-height: 200px;
 }
 
