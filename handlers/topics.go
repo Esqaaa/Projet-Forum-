@@ -119,13 +119,15 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     t.Date = string(rawDate)
 
     rows, err := database.DB.Query(`
-        SELECT m.id, m.content, m.created_at, u.username,
-               (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id) AS likes_count,
-               (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id AND user_id = ?) AS has_liked
-        FROM messages m 
-        JOIN users u ON m.author_id = u.id 
-        WHERE m.topic_id = ? 
-        ORDER BY m.created_at ASC`, currentUserID, topicID) 
+		SELECT m.id, m.content, m.created_at, u.username, m.author_id,
+		       (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id) AS likes_count,
+		       (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id AND user_id = ?) AS has_liked,
+		       (SELECT COUNT(*) FROM message_dislikes WHERE message_id = m.id) AS dislikes_count,
+		       (SELECT COUNT(*) FROM message_dislikes WHERE message_id = m.id AND user_id = ?) AS has_disliked
+		FROM messages m 
+		JOIN users u ON m.author_id = u.id 
+		WHERE m.topic_id = ? 
+		ORDER BY m.created_at ASC`, currentUserID, currentUserID, topicID)
     
     if err == nil {
         defer rows.Close()
@@ -135,15 +137,17 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     for rows != nil && rows.Next() {
         var c models.Comment
         var cDate []byte
-        var hasLikedCount int 
+        var hasLikedCount int
+        var hasDislikedCount int  
 
-        err = rows.Scan(&c.ID, &c.Content, &cDate, &c.Author, &c.LikesCount, &hasLikedCount)
+        err = rows.Scan(&c.ID, &c.Content, &cDate, &c.Author, &c.AuthorID, &c.LikesCount, &hasLikedCount, &c.DislikesCount, &hasDislikedCount)
         if err != nil {
             fmt.Println("Erreur Scan message:", err)
             continue
         }
 
         c.HasLiked = hasLikedCount > 0
+        c.HasDisliked = hasDislikedCount > 0
         c.Date = string(cDate)
         comments = append(comments, c)
     }

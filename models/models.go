@@ -26,13 +26,15 @@ type Message struct {
 }
 
 type Comment struct {
-    ID        int			// ID unique du commentaire
-    Content   string		// Contenu du commentaire 
-    TopicID   int			// ID du topic auquel le commentaire appartient 
-    Author    string		// Nom de l'auteur du commentaire 
-	AuthorID  int 			// ID de l'auteur 
-    Date      string		// Date d'envoi du commentaire 
-	LikesCount int			// Nombre total de like 
-	HasLiked  bool			// Indique si l'utilisateur connecté a liké 
+    ID        		int			// ID unique du commentaire
+    Content   		string		// Contenu du commentaire 
+    TopicID   		int			// ID du topic auquel le commentaire appartient 
+    Author   		string		// Nom de l'auteur du commentaire 
+	AuthorID  		int 		// ID de l'auteur 
+    Date      		string		// Date d'envoi du commentaire 
+	LikesCount 		int			// Nombre total de like 
+	HasLiked  		bool		// Indique si l'utilisateur connecté a liké
+	DislikesCount 	int  		// Nombre total de dislikes
+	HasDisliked		bool		// Indique si l'utilisateur connecté a disliké 
 }
 

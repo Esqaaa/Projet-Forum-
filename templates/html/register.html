@@ -3,18 +3,18 @@
 <link rel="stylesheet" href="../static/css/styles_login.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<form method="POST" action="/register">
+<form method="POST" action="/register" novalidate>
 
     <h1>INSCRIPTION</h1>
 
     <div class="input-group">
         <i class="fa-solid fa-user icon"></i>
-        <input type="text" name="username" placeholder="Pseudo" required>
+        <input type="text" name="username" placeholder="Pseudo" value="{{.Username}}" required>
     </div>
 
     <div class="input-group">
         <i class="fa-solid fa-envelope icon"></i>
-        <input type="email" name="email" placeholder="Email" required>
+        <input type="email" name="email" placeholder="Email" value="{{.Email}}" required>
     </div>
 
     <div class="input-group">
@@ -28,9 +28,13 @@
 
 </form>
 
-{{if .Error}}
+{{if .Errors}}
 <div class="popup-error">
-    {{.Error}}
+    <ul>
+        {{range .Errors}}
+            <li>{{.}}</li>
+        {{end}}
+    </ul>
 </div>
 {{end}}
 
