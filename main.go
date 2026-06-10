@@ -27,6 +27,7 @@ func main() {
 	http.HandleFunc("/topic/update-status", handlers.UpdateTopicStatusHandler)
 	http.HandleFunc("/message/like", handlers.LikeMessageHandler)
 	http.HandleFunc("/message/dislike", handlers.DislikeMessageHandler)
+	http.HandleFunc("/search", handlers.SearchHandler)
 
 	http.HandleFunc("/", handlers.HomeHandler)
 
