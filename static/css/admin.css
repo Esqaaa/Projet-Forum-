@@ -1,0 +1,32 @@
+.admin-container {
+    width: 85%;
+    margin: auto;
+    color: white;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+}
+
+.admin-table th, .admin-table td {
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 10px;
+}
+
+.btn-danger {
+    color: white;
+    background: #ff4a4a;
+    padding: 6px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.btn-edit {
+    color: white;
+    background: #6384ff;
+    padding: 6px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+}

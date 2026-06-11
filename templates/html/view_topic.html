@@ -1,235 +1,188 @@
 {{define "content"}}
 
 <link rel="stylesheet" href="/static/css/forum.css">
+<link rel="stylesheet" href="/static/css/topic.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <div class="container">
     <div class="glass-card">
+
+        <!-- HEADER DU TOPIC -->
         <div class="topic-header">
+
             <div>
-                <a href="/" class="back-link">
-                    ← Retour à l'accueil
-                </a>
+                <a href="/" class="back-link">← Retour à l'accueil</a>
 
                 <h1 class="topic-title {{if eq .Topic.Status "fermé"}}topic-title-closed{{else}}topic-title-open{{end}}">
                     {{if eq .Topic.Status "fermé"}}
-                    <i class="fa-solid fa-lock lock-icon"></i>
+                        <i class="fa-solid fa-lock lock-icon"></i>
                     {{end}}
                     {{.Topic.Title}}
                 </h1>
 
                 <div class="topic-meta">
-                    <span>
-                        Par <strong>{{.Topic.Author}}</strong>
-                    </span>
+                    <span>Par <strong>{{.Topic.Author}}</strong></span>
                     <span>•</span>
-                    <span>
-                        Le {{.Topic.CreatedAt}}
-                    </span>
+                    <span>Le {{.Topic.CreatedAt}}</span>
                     <span>•</span>
-                    <span>
-                        Statut :
-                        <strong>{{.Topic.Status}}</strong>
-                    </span>
+                    <span>Statut : <strong>{{.Topic.Status}}</strong></span>
                     <span>•</span>
-                    <span>
-                        Catégorie :
-                        <strong class="category-badge">
-                            {{.Topic.Category}}
-                        </strong>
-                    </span>
+                    <span>Catégorie : <strong class="category-badge">{{.Topic.Category}}</strong></span>
                 </div>
             </div>
 
-            {{if eq .CurrentUserID .Topic.AuthorID}}
-            <a
-                href="/topic/delete?id={{.Topic.ID}}"
-                class="delete-topic-btn"
-                onclick="return confirm('Es-tu sûr de vouloir supprimer ce topic et tous ses messages ?')">
+            <!-- BOUTONS ADMIN OU AUTEUR -->
+            <div style="display:flex; gap:10px;">
 
-                <i class="fa-solid fa-trash"></i>
-                Supprimer
-            </a>
-            {{end}}
+                <!-- AUTEUR : supprimer -->
+                {{if or (eq .User.Role "admin") (eq .CurrentUserID .Topic.AuthorID)}}
+                <a href="/topic/delete?id={{.Topic.ID}}" class="delete-topic-btn"
+                   onclick="return confirm('Supprimer ce topic et tous ses messages ?')">
+                    <i class="fa-solid fa-trash"></i> Supprimer
+                </a>
+                {{end}}
 
-        </div>
-        {{if eq .CurrentUserID .Topic.AuthorID}}
+            </div>
+
+        </div> <!-- FIN HEADER -->
+
+        <!-- BLOC CHANGEMENT DE STATUT (Auteur + Admin) -->
+        {{if or (eq .CurrentUserID .Topic.AuthorID) (eq .User.Role "admin")}}
         <div class="admin-panel">
 
-            <span class="comment-author">
-                Changer le statut :
-            </span>
+            <span class="comment-author">Changer le statut :</span>
 
             <div class="status-actions">
-                <a
-                    href="/topic/update-status?id={{.Topic.ID}}&status=ouvert"
-                    class="status-btn status-open {{if eq .Topic.Status "ouvert"}}status-active{{end}}">
+                <a href="/topic/update-status?id={{.Topic.ID}}&status=ouvert"
+                   class="status-btn status-open {{if eq .Topic.Status "ouvert"}}status-active{{end}}">
                     Ouvert
                 </a>
-                <a
-                    href="/topic/update-status?id={{.Topic.ID}}&status=fermé"
-                    class="status-btn status-closed {{if eq .Topic.Status "fermé"}}status-active{{end}}">
+
+                <a href="/topic/update-status?id={{.Topic.ID}}&status=fermé"
+                   class="status-btn status-closed {{if eq .Topic.Status "fermé"}}status-active{{end}}">
                     Fermé
                 </a>
-                <a
-                    href="/topic/update-status?id={{.Topic.ID}}&status=archivé"
-                    class="status-btn status-archived {{if eq .Topic.Status "archivé"}}status-active{{end}}">
+
+                <a href="/topic/update-status?id={{.Topic.ID}}&status=archivé"
+                   class="status-btn status-archived {{if eq .Topic.Status "archivé"}}status-active{{end}}">
                     Archivé
                 </a>
             </div>
-        </div>
 
+        </div>
         {{end}}
 
-        <div class="topic-content">
-            {{.Topic.Content}}
-        </div>
+        <!-- CONTENU DU TOPIC -->
+        <div class="topic-content">{{.Topic.Content}}</div>
 
         {{if .Topic.ImageURL}}
-
         <div class="topic-image-container">
             <a href="{{.Topic.ImageURL}}" target="_blank">
-                <img
-                    src="{{.Topic.ImageURL}}"
-                    alt="Illustration du sujet"
-                    class="topic-image">
+                <img src="{{.Topic.ImageURL}}" alt="Illustration du sujet" class="topic-image">
             </a>
-
-            <p class="image-hint">
-                Cliquez sur l'image pour l'agrandir
-            </p>
-
+            <p class="image-hint">Cliquez sur l'image pour l'agrandir</p>
         </div>
         {{end}}
 
+        <!-- COMMENTAIRES -->
         <div class="comments-section">
-            <h3>
-                <i class="fa-regular fa-comments"></i>
-                Commentaires
-            </h3>
+
+            <h3><i class="fa-regular fa-comments"></i> Commentaires</h3>
+
             {{range .Comments}}
             <div class="comment-card">
+
                 <div class="comment-header">
                     <div>
-                        <strong class="comment-author">
-                            {{.Author}}
-                        </strong>
-
-                        <span class="comment-date">
-                            {{.Date}}
-                        </span>
+                        <strong class="comment-author">{{.Author}}</strong>
+                        <span class="comment-date">{{.Date}}</span>
                     </div>
+
                     <div class="comment-actions">
 
-                        <a
-                            href="/message/like?id={{.ID}}&topic_id={{$.Topic.ID}}"
-                            class="like-btn {{if .HasLiked}}liked{{end}}"
-                            title="Liker ce message">
+                        <!-- LIKE -->
+                        <a href="/message/like?id={{.ID}}&topic_id={{$.Topic.ID}}"
+                           class="like-btn {{if .HasLiked}}liked{{end}}"
+                           title="Liker ce message">
                             <i class="{{if .HasLiked}}fa-solid{{else}}fa-regular{{end}} fa-heart"></i>
-                            <span class="like-count">
-                                {{.LikesCount}}
-                            </span>
+                            <span class="like-count">{{.LikesCount}}</span>
                         </a>
 
-                        <a
-                            href="/message/dislike?id={{.ID}}&topic_id={{$.Topic.ID}}"
-                            class="dislike-btn {{if .HasDisliked}}disliked{{end}}"
-                            title="Disliker ce message">
+                        <!-- DISLIKE -->
+                        <a href="/message/dislike?id={{.ID}}&topic_id={{$.Topic.ID}}"
+                           class="dislike-btn {{if .HasDisliked}}disliked{{end}}"
+                           title="Disliker ce message">
                             <i class="fa-solid fa-heart-crack"></i>
-                            <span class="dislike-count">
-                                {{.DislikesCount}}
-                            </span>
+                            <span class="dislike-count">{{.DislikesCount}}</span>
                         </a>
 
-                        {{if or (eq $.CurrentUserID .AuthorID) (eq $.CurrentUserID $.Topic.AuthorID)}}
-                        <button
-                            class="edit-btn"
-                            onclick="toggleEdit('{{.ID}}')"
-                            title="Modifier">
+                        <!-- EDIT : auteur OU admin -->
+                        {{if or (eq $.CurrentUserID .AuthorID) (eq $.User.Role "admin")}}
+                        <button class="edit-btn" onclick="toggleEdit('{{.ID}}')" title="Modifier">
                             <i class="fa-solid fa-pen"></i>
                         </button>
                         {{end}}
 
-                        {{if or (eq $.CurrentUserID $.Topic.AuthorID) (eq $.CurrentUserID .AuthorID)}}
-                        <a
-                            href="/message/delete?id={{.ID}}&topic_id={{$.Topic.ID}}"
-                            class="delete-btn"
-                            onclick="return confirm('Supprimer ce message ?')">
+                        <!-- DELETE : auteur OU admin -->
+                        {{if or (eq $.CurrentUserID .AuthorID) (eq $.User.Role "admin")}}
+                        <a href="/message/delete?id={{.ID}}&topic_id={{$.Topic.ID}}"
+                           class="delete-btn"
+                           onclick="return confirm('Supprimer ce message ?')">
                             <i class="fa-solid fa-xmark"></i>
                         </a>
                         {{end}}
+
                     </div>
                 </div>
 
                 <div id="content-{{.ID}}" class="comment-content">{{.Content}}</div>
 
-                <div
-                    id="edit-form-{{.ID}}"
-                    class="edit-form">
-
+                <!-- FORMULAIRE D'ÉDITION -->
+                <div id="edit-form-{{.ID}}" class="edit-form">
                     <form action="/message/edit" method="POST">
                         <input type="hidden" name="message_id" value="{{.ID}}">
                         <input type="hidden" name="topic_id" value="{{$.Topic.ID}}">
 
-                        <textarea
-                            id="textarea-{{.ID}}"
-                            name="content"
-                            class="edit-textarea"
-                            oninput="autoGrow(this)">{{.Content}}</textarea>
+                        <textarea id="textarea-{{.ID}}" name="content"
+                                  class="edit-textarea"
+                                  oninput="autoGrow(this)">{{.Content}}</textarea>
 
                         <div class="edit-actions">
-                            <button type="submit" class="btn-main">
-                                Sauvegarder
-                            </button>
-
-                            <button type="button" class="cancel-btn" onclick="toggleEdit('{{.ID}}')">
-                                Annuler
-                            </button>
+                            <button type="submit" class="btn-main">Sauvegarder</button>
+                            <button type="button" class="cancel-btn" onclick="toggleEdit('{{.ID}}')">Annuler</button>
                         </div>
                     </form>
                 </div>
-            </div>
 
+            </div>
             {{else}}
-            <p class="no-comments">
-                Aucun message pour le moment...
-            </p>
+                <p class="no-comments">Aucun message pour le moment...</p>
             {{end}}
-            {{if or (eq .Topic.Status "fermé") (eq .Topic.Status "archivé")}}
 
+            <!-- SI TOPIC FERMÉ -->
+            {{if or (eq .Topic.Status "fermé") (eq .Topic.Status "archivé")}}
             <div class="topic-locked">
-                <i class="fa-solid fa-lock"></i>
-                <br>
-                Ce sujet est
-                <strong>{{.Topic.Status}}</strong>.
-                Les interactions sont désactivées.
+                <i class="fa-solid fa-lock"></i><br>
+                Ce sujet est <strong>{{.Topic.Status}}</strong>. Les interactions sont désactivées.
             </div>
 
+            <!-- FORMULAIRE DE RÉPONSE -->
             {{else}}
-            <h3 class="reply-title">
-                Répondre au sujet
-            </h3>
+            <h3 class="reply-title">Répondre au sujet</h3>
 
             <form action="/message/post" method="POST">
-                <input
-                    type="hidden"
-                    name="topic_id"
-                    value="{{.Topic.ID}}">
-
-                <textarea
-                    name="content"
-                    class="reply-textarea"
-                    placeholder="Écrivez votre message ici..."
-                    required></textarea>
-
-                <button type="submit" class="btn-main">
-                    Envoyer le message
-                </button>
+                <input type="hidden" name="topic_id" value="{{.Topic.ID}}">
+                <textarea name="content" class="reply-textarea"
+                          placeholder="Écrivez votre message ici..." required></textarea>
+                <button type="submit" class="btn-main">Envoyer le message</button>
             </form>
             {{end}}
+
         </div>
+
     </div>
 </div>
 
 <script src="/static/js/toggle_edit.js"></script>
+
 {{end}}

@@ -110,6 +110,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
     
     data := map[string]interface{}{
         "Topics":        topics,
+        "Page":          "home",
         "CurrentUserID": currentUserID,
         "CurrentPage": currentPage,
         "TotalPages":  totalPages,
@@ -121,5 +122,5 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
         "Categories": categories,
     }
 
-    RenderTemplate(w, "index.html", data)
+    RenderTemplate(w, r, "index.html", data)
 }
