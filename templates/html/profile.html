@@ -24,8 +24,19 @@
             </button>
 
             <h2 style="margin: 0; color: #fff;">{{.Profile.Username}}</h2>
-            <p style="opacity: 0.5; font-size: 0.8rem; margin-top: 5px;">En ligne le : <br>{{.Profile.LastLogin}}</p>
-        </div>
+            <p style="opacity: 0.5; font-size: 0.8rem; margin-top: 5px; margin-bottom: 20px;">En ligne le : <br>{{.Profile.LastLogin}}</p>
+
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; text-align: left; font-size: 0.85rem; color: #eee; display: flex; flex-direction: column; gap: 8px;">
+                <div>
+                    <i class="fa-solid fa-file-pen" style="color: #6384ff; margin-right: 8px; width: 16px;"></i>
+                    <span>Topics créés : <strong style="color: #fff; float: right;">{{.Profile.TopicsCount}}</strong></span>
+                </div>
+                <div>
+                    <i class="fa-solid fa-comments" style="color: #bc84ee; margin-right: 8px; width: 16px;"></i>
+                    <span>Messages postés : <strong style="color: #fff; float: right;">{{.Profile.CommentCount}}</strong></span>
+                </div>
+            </div>
+            </div>
 
         <div>
             <h3 style="margin-top: 0; color: #bc84ee; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
