@@ -8,7 +8,11 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
 
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    role ENUM('user', 'admin') DEFAULT 'user'
+    biography TEXT DEFAULT '',
+    avatar_url VARCHAR(255) DEFAULT '/static/uploads/default-avatar.png',
+    last_login DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    role ENUM('user', 'admin') DEFAULT 'user',
     is_banned BOOLEAN DEFAULT 0
 );
