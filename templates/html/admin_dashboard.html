@@ -1,0 +1,79 @@
+{{define "content"}}
+
+<link rel="stylesheet" href="/static/css/admin.css">
+
+<div class="admin-container">
+
+    <h1>Dashboard Admin</h1>
+
+    <!-- GESTION DES TOPICS -->
+    <section>
+        <h2>Gestion des Topics</h2>
+
+        <table class="admin-table">
+            <tr>
+                <th>ID</th>
+                <th>Titre</th>
+                <th>Auteur</th>
+                <th>Actions</th>
+            </tr>
+
+            {{range .Topics}}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.Title}}</td>
+                <td>{{.AuthorID}}</td>
+                <td style="display:flex; gap:10px;">
+                    <a href="/topic/view?id={{.ID}}" class="btn-edit">
+                        <i class="fa-solid fa-pen"></i> Modifier
+                    </a>
+
+                    <a href="/topic/delete?id={{.ID}}" 
+                       class="btn-danger"
+                       onclick="return confirm('Supprimer ce topic ?')">
+                        <i class="fa-solid fa-trash"></i> Supprimer
+                    </a>
+                </td>
+            </tr>
+            {{end}}
+        </table>
+    </section>
+
+    <!-- GESTION DES UTILISATEURS -->
+    <section>
+        <h2>Gestion des Utilisateurs</h2>
+
+        <table class="admin-table">
+            <tr>
+                <th>ID</th>
+                <th>Pseudo</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Actions</th>
+            </tr>
+
+            {{range .Users}}
+            <tr>
+                <td>{{.ID}}</td>
+                <td>{{.Username}}</td>
+                <td>{{.Email}}</td>
+                <td>{{.Role}}</td>
+                <td>
+                    {{if ne .Role "admin"}}
+                    <a href="/admin/ban?username={{.Username}}" 
+                       class="btn-danger"
+                       onclick="return confirm('Bannir cet utilisateur ?')">
+                        BAN
+                    </a>
+                    {{else}}
+                    <span style="opacity:0.5;">Admin</span>
+                    {{end}}
+                </td>
+            </tr>
+            {{end}}
+        </table>
+    </section>
+
+</div>
+
+{{end}}

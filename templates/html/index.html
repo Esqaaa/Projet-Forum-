@@ -6,7 +6,34 @@
 
 <div class="container">
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px;">
+    <!-- BANDEAU AU-DESSUS -->
+    <div class="top-user-bar">
+
+        <div class="tub-left">
+            {{if .User.ID}}
+                <span class="user-info">
+                    <i class="fa-solid fa-user"></i><strong> {{.User.Username}}</strong> connecté
+                </span>
+
+                {{if eq .User.Role "admin"}}
+                    <a href="/admin" class="admin-badge">Dashboard</a>
+                {{end}}
+            {{end}}
+        </div>
+
+        <div class="tub-right">
+            {{if .User.ID}}
+                <a href="/logout" class="logout-btn">Déconnexion</a>
+            {{else}}
+                <a href="/login" class="logout-btn">Connexion</a>
+            {{end}}
+        </div>
+
+    </div>
+
+    <!-- TITRE -->
+    <div class="topics-title-bar">
+
         <h1>Derniers Topics</h1>
         
         <form action="/search" method="GET" style="display: grid; grid-template-columns: 1fr auto; gap: 8px; flex-grow: 1; max-width: 450px; margin: 0; min-width: 200px;">
@@ -45,20 +72,25 @@
         {{end}}
     </div>
 
+
+    <!-- LISTE DES TOPICS -->
     <div class="topics-list">
 
         {{range .Topics}}
         <div style="position: relative;">
 
+            <!-- BOUTON ÉPINGLER -->
             <a href="/topic/pin?id={{.ID}}" 
                class="pin-btn {{if .IsPinned}}pinned{{end}}" 
                title="Épingler le sujet">
                 <i class="fa-solid fa-thumbtack"></i>
             </a>
 
+            <!-- LIEN VERS LE TOPIC -->
             <a href="/topic/view?id={{.ID}}" class="topic-link">
                 <div class="topic-card" style="{{if .IsPinned}}border-left: 4px solid #bc84ee;{{end}}">
 
+                    <!-- TITRE -->
                     <h3 style="margin-bottom: 10px; padding-left: 20px; color:
                         {{if or (eq .Status "fermé") (eq .Status "Fermé")}}#ff4a4a
                         {{else if .IsPinned}}#FFA800
@@ -70,13 +102,13 @@
 
                         {{.Title}}
 
-                        <span style="font-size: 0.75rem; font-weight: normal; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; color: #fff; margin-left: 10px; vertical-align: middle; border: 1px solid rgba(255,255,255,0.1);">
-                            {{.Category}}
-                        </span>
+                        
                     </h3>
 
+                    <!-- CONTENU -->
                     <p style="margin-bottom: 15px;">{{.Content}}</p>
 
+                    <!-- META -->
                     <div style="display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.6;">
                         <div>Par <strong>{{.Author}}</strong></div>
                         <div>{{.CreatedAt}}</div>
@@ -93,38 +125,6 @@
         {{end}}
 
     </div>
-
-    {{if gt .TotalPages 1}}
-    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 40px; font-size: 0.9rem;">
-
-        {{if .HasPrev}}
-        <a href="/?page={{.PrevPage}}{{if .SelectedCategory}}&category={{.SelectedCategory}}{{end}}" 
-           style="color: #6384ff; text-decoration: none; padding: 8px 16px; border: 1px solid rgba(99, 132, 255, 0.3); border-radius: 5px; background: rgba(99, 132, 255, 0.05);">
-            <i class="fa-solid fa-chevron-left"></i> Précédent
-        </a>
-        {{else}}
-        <span style="opacity: 0.3; padding: 8px 16px; border: 1px solid rgba(255,255,255,0.05); border-radius: 5px;">
-            <i class="fa-solid fa-chevron-left"></i> Précédent
-        </span>
-        {{end}}
-
-        <span style="opacity: 0.7;">
-            Page <strong>{{.CurrentPage}}</strong> sur <strong>{{.TotalPages}}</strong>
-        </span>
-
-        {{if .HasNext}}
-        <a href="/?page={{.NextPage}}{{if .SelectedCategory}}&category={{.SelectedCategory}}{{end}}" 
-           style="color: #6384ff; text-decoration: none; padding: 8px 16px; border: 1px solid rgba(99, 132, 255, 0.3); border-radius: 5px; background: rgba(99, 132, 255, 0.05);">
-            Suivant <i class="fa-solid fa-chevron-right"></i>
-        </a>
-        {{else}}
-        <span style="opacity: 0.3; padding: 8px 16px; border: 1px solid rgba(255,255,255,0.05); border-radius: 5px;">
-            Suivant <i class="fa-solid fa-chevron-right"></i>
-        </span>
-        {{end}}
-
-    </div>
-    {{end}}
 
 </div>
 

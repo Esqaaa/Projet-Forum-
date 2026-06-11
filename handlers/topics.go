@@ -2,20 +2,20 @@ package handlers
 
 import (
     "database/sql"
-	"forum/database"
-	"forum/models"
-	"net/http"
     "fmt"
+    "forum/database"
+    "forum/models"
     "io"
+    "net/http"
     "os"
     "time"
 )
 
 func GetLoggedUserID(r *http.Request) int {
-	cookie, err := r.Cookie("session")
-	if err != nil {
-		return 0
-	}
+    cookie, err := r.Cookie("session")
+    if err != nil {
+        return 0
+    }
 
 	var userID int
 	query := "SELECT id FROM users WHERE BINARY username = ? OR BINARY email = ?"
@@ -24,6 +24,40 @@ func GetLoggedUserID(r *http.Request) int {
 		return 0
 	}
 	return userID
+    
+    err = database.DB.QueryRow(query, cookie.Value, cookie.Value).Scan(&userID)
+    if err != nil {
+        return 0
+    }
+    return userID
+}
+
+func GetLoggedUser(r *http.Request) (models.User, error) {
+    cookie, err := r.Cookie("session")
+    if err != nil {
+        return models.User{}, err
+    }
+
+    var u models.User
+
+    query := `
+        SELECT id, username, email, role
+        FROM users
+        WHERE username = ? OR email = ?
+    `
+
+    err = database.DB.QueryRow(query, cookie.Value, cookie.Value).Scan(
+        &u.ID,
+        &u.Username,
+        &u.Email,
+        &u.Role,
+    )
+
+    if err != nil {
+        return models.User{}, err
+    }
+
+    return u, nil
 }
 
 func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,12 +68,12 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     if r.Method == http.MethodGet {
-        RenderTemplate(w, "create_topic.html", nil)
+        RenderTemplate(w, r, "create_topic.html", nil)
         return
     }
 
     if r.Method == http.MethodPost {
-        r.ParseMultipartForm(5 << 20) 
+        r.ParseMultipartForm(5 << 20)
 
         title := r.FormValue("title")
         content := r.FormValue("content")
@@ -51,7 +85,7 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
         var imagePath string
 
         file, handler, err := r.FormFile("image")
-        if err == nil { 
+        if err == nil {
             defer file.Close()
             fileName := fmt.Sprintf("%d-%s", time.Now().Unix(), handler.Filename)
             imagePath = "/static/uploads/" + fileName
@@ -66,13 +100,13 @@ func CreateTopicHandler(w http.ResponseWriter, r *http.Request) {
 
         query := "INSERT INTO topics (title, content, author_id, status, image_url, category) VALUES (?, ?, ?, ?, ?, ?)"
         _, err = database.DB.Exec(query, title, content, userID, "ouvert", imagePath, category)
-        
+
         if err != nil {
             http.Error(w, "Erreur création : "+err.Error(), 500)
             return
         }
         http.Redirect(w, r, "/", http.StatusSeeOther)
-        return 
+        return
     }
 }
 
@@ -91,20 +125,20 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
         WHERE t.id = ?`
 
     err := database.DB.QueryRow(query, topicID).Scan(
-        &t.ID, 
-        &t.Title, 
-        &t.Content, 
-        &t.Status, 
-        &t.IsPinned, 
+        &t.ID,
+        &t.Title,
+        &t.Content,
+        &t.Status,
+        &t.IsPinned,
         &rawDate,
-        &t.Category, 
+        &t.Category,
         &t.Author,
         &t.AuthorID,
         &imageURL,
     )
 
     if err != nil {
-        fmt.Println("Erreur ViewTopic:", err) 
+        fmt.Println("Erreur ViewTopic:", err)
         http.Redirect(w, r, "/", http.StatusSeeOther)
         return
     }
@@ -134,20 +168,16 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE m.topic_id = ? 
 		ORDER BY m.created_at ASC`, currentUserID, currentUserID, topicID)
     
-    
-    if err != nil {
-        fmt.Println("Erreur lors de la requête SQL des messages:", err)
-        http.Error(w, "Erreur récupération messages", 500)
-        return
+    if err == nil {
+        defer rows.Close()
     }
-    defer rows.Close()
     
     var comments []models.Comment
     for rows != nil && rows.Next() {
         var c models.Comment
         var cDate []byte
         var hasLikedCount int
-        var hasDislikedCount int  
+        var hasDislikedCount int
 
         err = rows.Scan(&c.ID, &c.Content, &cDate, &c.Author, &c.AuthorID, &c.LikesCount, &hasLikedCount, &c.DislikesCount, &hasDislikedCount)
         if err != nil {
@@ -166,7 +196,7 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
         "Comments":      comments,
         "CurrentUserID": currentUserID,
     }
-    RenderTemplate(w, "view_topic.html", data)
+    RenderTemplate(w, r, "view_topic.html", data)
 }
 
 func PostMessageHandler(w http.ResponseWriter, r *http.Request) {
@@ -199,13 +229,13 @@ func PostMessageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
-    userID := GetLoggedUserID(r)
+    user, _ := GetLoggedUser(r)
     topicID := r.URL.Query().Get("id")
+
     var authorID int
-    
     err := database.DB.QueryRow("SELECT author_id FROM topics WHERE id = ?", topicID).Scan(&authorID)
 
-    if err != nil || userID != authorID {
+    if err != nil || (user.ID != authorID && user.Role != "admin") {
         http.Error(w, "Action non autorisée", http.StatusForbidden)
         return
     }
@@ -215,8 +245,8 @@ func DeleteTopicHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
-    userID := GetLoggedUserID(r)
-    if userID == 0 {
+    user, _ := GetLoggedUser(r)
+    if user.ID == 0 {
         http.Redirect(w, r, "/login", http.StatusSeeOther)
         return
     }
@@ -224,36 +254,20 @@ func DeleteMessageHandler(w http.ResponseWriter, r *http.Request) {
     messageID := r.URL.Query().Get("id")
     topicID := r.URL.Query().Get("topic_id")
 
-    var topicAuthorID int
-    topicQuery := `SELECT t.author_id FROM topics t 
-                   JOIN messages m ON t.id = m.topic_id 
-                   WHERE m.id = ?`
-    err := database.DB.QueryRow(topicQuery, messageID).Scan(&topicAuthorID)
-    if err != nil {
-        fmt.Println("Erreur recherche auteur topic:", err)
-        http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
-        return
-    }
-
     var messageAuthorID int
-    messageQuery := `SELECT author_id FROM messages WHERE id = ?`
-    err = database.DB.QueryRow(messageQuery, messageID).Scan(&messageAuthorID)
+    err := database.DB.QueryRow("SELECT author_id FROM messages WHERE id = ?", messageID).Scan(&messageAuthorID)
     if err != nil {
-        fmt.Println("Erreur recherche auteur message:", err)
         http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
         return
     }
 
-    if userID == topicAuthorID || userID == messageAuthorID {
-        _, err = database.DB.Exec("DELETE FROM messages WHERE id = ?", messageID)
-        if err != nil {
-            fmt.Println("Erreur lors de la suppression en BDD:", err)
-        }
-        http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+    if user.ID != messageAuthorID && user.Role != "admin" {
+        http.Error(w, "Action non autorisée", http.StatusForbidden)
         return
     }
 
-    http.Error(w, "Action non autorisée", http.StatusForbidden)
+    database.DB.Exec("DELETE FROM messages WHERE id = ?", messageID)
+    http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
 }
 
 func EditMessageHandler(w http.ResponseWriter, r *http.Request) {
@@ -262,51 +276,8 @@ func EditMessageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    userID := GetLoggedUserID(r)
-    if userID == 0 {
-        http.Redirect(w, r, "/login", http.StatusSeeOther)
-        return
-    }
-
-    messageID := r.FormValue("message_id")
-    topicID := r.FormValue("topic_id") 
-    newContent := r.FormValue("content")
-
-    if newContent == "" {
-        http.Error(w, "Le contenu ne peut pas être vide", http.StatusBadRequest)
-        return
-    }
-
-    var commentAuthorID int
-    query := "SELECT author_id FROM messages WHERE id = ?"
-    err := database.DB.QueryRow(query, messageID).Scan(&commentAuthorID)
-    if err != nil {
-        http.Error(w, "Message introuvable", http.StatusNotFound)
-        return
-    }
-
-    if userID != commentAuthorID {
-        http.Error(w, "Action non autorisée", http.StatusForbidden)
-        return
-    }
-
-    _, err = database.DB.Exec("UPDATE messages SET content = ? WHERE id = ?", newContent, messageID)
-    if err != nil {
-        http.Error(w, "Erreur BDD", 500)
-        return
-    }
-
-    http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
-}
-
-func UpdateMessageHandler(w http.ResponseWriter, r *http.Request) {
-    if r.Method != http.MethodPost {
-        http.Redirect(w, r, "/", http.StatusSeeOther)
-        return
-    }
-
-    userID := GetLoggedUserID(r)
-    if userID == 0 {
+    user, _ := GetLoggedUser(r)
+    if user.ID == 0 {
         http.Redirect(w, r, "/login", http.StatusSeeOther)
         return
     }
@@ -320,23 +291,21 @@ func UpdateMessageHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    var commentAuthorID int
-    query := "SELECT author_id FROM messages WHERE id = ?"
-    err := database.DB.QueryRow(query, messageID).Scan(&commentAuthorID)
-
+    var messageAuthorID int
+    err := database.DB.QueryRow("SELECT author_id FROM messages WHERE id = ?", messageID).Scan(&messageAuthorID)
     if err != nil {
         http.Error(w, "Message introuvable", http.StatusNotFound)
         return
     }
 
-    if userID != commentAuthorID {
-        http.Error(w, "Action non autorisée : vous n'êtes pas l'auteur de ce commentaire", http.StatusForbidden)
+    if user.ID != messageAuthorID && user.Role != "admin" {
+        http.Error(w, "Action non autorisée", http.StatusForbidden)
         return
     }
 
     _, err = database.DB.Exec("UPDATE messages SET content = ? WHERE id = ?", newContent, messageID)
     if err != nil {
-        http.Error(w, "Erreur lors de la mise à jour du message : "+err.Error(), 500)
+        http.Error(w, "Erreur BDD", 500)
         return
     }
 
@@ -344,14 +313,14 @@ func UpdateMessageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateTopicStatusHandler(w http.ResponseWriter, r *http.Request) {
-    userID := GetLoggedUserID(r)
+    user, _ := GetLoggedUser(r)
     topicID := r.URL.Query().Get("id")
-    newStatus := r.URL.Query().Get("status") 
+    newStatus := r.URL.Query().Get("status")
 
     var authorID int
     err := database.DB.QueryRow("SELECT author_id FROM topics WHERE id = ?", topicID).Scan(&authorID)
-    
-    if err != nil || userID != authorID {
+
+    if err != nil || (user.ID != authorID && user.Role != "admin") {
         http.Error(w, "Action non autorisée", http.StatusForbidden)
         return
     }
@@ -370,7 +339,7 @@ func UpdateTopicStatusHandler(w http.ResponseWriter, r *http.Request) {
 
     http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
 }
- 
+
 func PinTopicHandler(w http.ResponseWriter, r *http.Request) {
     userID := GetLoggedUserID(r)
     topicID := r.URL.Query().Get("id")

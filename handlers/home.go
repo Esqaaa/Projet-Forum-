@@ -118,17 +118,18 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
     categories := []string{"Sport", "Musique", "Automobile", "Aviation", "Sciences", "Informatique"}
     
     data := map[string]interface{}{
-        "Topics":           topics,
-        "CurrentUserID":    currentUserID,
-        "CurrentPage":      currentPage,
-        "TotalPages":       totalPages,
-        "HasPrev":          currentPage > 1,
-        "HasNext":          currentPage < totalPages,
-        "PrevPage":         currentPage - 1,
-        "NextPage":         currentPage + 1,
+        "Topics":        topics,
+        "Page":          "home",
+        "CurrentUserID": currentUserID,
+        "CurrentPage": currentPage,
+        "TotalPages":  totalPages,
+        "HasPrev":     currentPage > 1,
+        "HasNext":     currentPage < totalPages,
+        "PrevPage":    currentPage - 1,
+        "NextPage":    currentPage + 1,
         "SelectedCategory": categoryFilter,
         "Categories":       categories,
     }
 
-    RenderTemplate(w, "index.html", data)
+    RenderTemplate(w, r, "index.html", data)
 }
