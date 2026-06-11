@@ -7,7 +7,7 @@ import (
     "html/template"
     "net/http"
     "regexp"
-
+    "fmt"
     "golang.org/x/crypto/bcrypt"
 )
 
@@ -191,6 +191,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
             Identifier: identifier,
         })
         return
+    }
+
+    // Mise à jour du last_login
+    _, err = database.DB.Exec("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?", id)
+    if err != nil {
+        fmt.Println("Erreur lors de la mise à jour de last_login :", err)
     }
 
     http.SetCookie(w, &http.Cookie{

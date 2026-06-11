@@ -1,0 +1,65 @@
+{{define "content"}}
+<link rel="stylesheet" href="/static/css/forum.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div class="container" style="max-width: 850px; margin-top: 40px;">
+    
+    <a href="/" style="color:#6384ff; text-decoration:none; font-size:0.9rem;">← Retour au forum</a>
+
+    {{if eq .Status "success"}}
+        <div style="background: rgba(68, 255, 112, 0.1); border: 1px solid #44ff70; color: #44ff70; padding: 12px; border-radius: 6px; margin: 20px 0; text-align: center;">
+            <i class="fa-solid fa-circle-check"></i> Profil mis à jour avec succès !
+        </div>
+    {{end}}
+
+    <div class="glass-card" style="padding: 30px; margin-top: 20px; display: grid; grid-template-columns: 1fr 2fr; gap: 40px; align-items: start; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); border-radius: 12px;">
+        
+        <div style="text-align: center; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 30px;">
+            <div style="width: 120px; height: 120px; margin: 0 auto 15px auto; border-radius: 50%; overflow: hidden; border: 2px solid #6384ff; background: #1a1a1a; position: relative;">
+                <img id="preview" src="{{.Profile.AvatarURL}}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            
+            <button id="removeImage" class="btn-main" style="display: none; margin: 0 auto 15px auto; padding: 4px 10px; font-size: 0.75rem; background: #ff4a4a; border-radius: 4px;">
+                <i class="fa-solid fa-trash"></i> Annuler la sélection
+            </button>
+
+            <h2 style="margin: 0; color: #fff;">{{.Profile.Username}}</h2>
+            <p style="opacity: 0.5; font-size: 0.8rem; margin-top: 5px;">En ligne le : <br>{{.Profile.LastLogin}}</p>
+        </div>
+
+        <div>
+            <h3 style="margin-top: 0; color: #bc84ee; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+                <i class="fa-solid fa-gear"></i> Paramètres du profil
+            </h3>
+            
+            <form action="/profile/update" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+                
+                <div>
+                    <label style="display: block; font-size: 0.85rem; opacity: 0.7; margin-bottom: 5px;">Changer de Photo de profil</label>
+                    <input type="file" id="image" name="avatar" accept="image/*"
+                        style="width: 100%; padding: 8px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: white; font-family: inherit; font-size: 0.85rem;">
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.85rem; opacity: 0.7; margin-bottom: 5px;">Adresse Email</label>
+                    <input type="email" name="email" value="{{.Profile.Email}}" required 
+                        style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: white; font-family: inherit; box-sizing: border-box;">
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.85rem; opacity: 0.7; margin-bottom: 5px;">Biographie</label>
+                    <textarea name="biography" rows="4" placeholder="Racontez quelque chose sur vous..." 
+                            style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: white; font-family: inherit; resize: none; box-sizing: border-box;">{{.Profile.Biography}}</textarea>
+                </div>
+
+                <button type="submit" class="btn-main" style="align-self: flex-start; margin-top: 10px; padding: 10px 25px; border-radius: 6px;">
+                    Enregistrer les modifications
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script src="/static/js/script_picture.js"></script>
+{{end}}

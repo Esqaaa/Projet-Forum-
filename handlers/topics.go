@@ -129,9 +129,13 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE m.topic_id = ? 
 		ORDER BY m.created_at ASC`, currentUserID, currentUserID, topicID)
     
-    if err == nil {
-        defer rows.Close()
+    
+    if err != nil {
+        fmt.Println("Erreur lors de la requête SQL des messages:", err)
+        http.Error(w, "Erreur récupération messages", 500)
+        return
     }
+    defer rows.Close()
     
     var comments []models.Comment
     for rows != nil && rows.Next() {

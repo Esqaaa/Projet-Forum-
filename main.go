@@ -28,6 +28,8 @@ func main() {
 	http.HandleFunc("/message/like", handlers.LikeMessageHandler)
 	http.HandleFunc("/message/dislike", handlers.DislikeMessageHandler)
 	http.HandleFunc("/search", handlers.SearchHandler)
+	http.HandleFunc("/profile", handlers.ProfileHandler)
+    http.HandleFunc("/profile/update", handlers.UpdateProfileHandler)
 
 	http.HandleFunc("/", handlers.HomeHandler)
 
