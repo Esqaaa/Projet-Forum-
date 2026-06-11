@@ -74,5 +74,5 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 		"Topics":           topics,
 		"CurrentUserID":    currentUserID,
 	}
-	RenderTemplate(w, "search.html", data)
+	RenderTemplate(w, r, "search.html", data)
 }

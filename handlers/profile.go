@@ -56,7 +56,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		"Status":        status,
 	}
 
-	RenderTemplate(w, "profile.html", data)
+	RenderTemplate(w, r, "profile.html", data)
 }
 
 // UpdateProfileHandler enregistre les modifications (Bio, Email, Photo)
