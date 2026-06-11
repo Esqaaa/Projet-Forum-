@@ -18,7 +18,7 @@ func GetLoggedUserID(r *http.Request) int {
 	}
 
 	var userID int
-	query := "SELECT id FROM users WHERE username = ? OR email = ?"
+	query := "SELECT id FROM users WHERE BINARY username = ? OR BINARY email = ?"
 	err = database.DB.QueryRow(query, cookie.Value, cookie.Value).Scan(&userID)
 	if err != nil {
 		return 0
@@ -106,6 +106,11 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         fmt.Println("Erreur ViewTopic:", err) 
         http.Redirect(w, r, "/", http.StatusSeeOther)
+        return
+    }
+
+    if t.Status == "archivé" && currentUserID != t.AuthorID {
+        http.Error(w, "Ce sujet a été archivé et n'est plus accessible.", http.StatusForbidden)
         return
     }
     

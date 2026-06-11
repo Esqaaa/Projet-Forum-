@@ -80,7 +80,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
     // VERIFICATION USERNAME EXISTE
     var tmp int
     err := database.DB.QueryRow(
-        "SELECT id FROM users WHERE username = ?",
+        "SELECT id FROM users WHERE BINARY username = ?",
         username,
     ).Scan(&tmp)
 
@@ -104,7 +104,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
     // VERIFICATION EMAIL EXISTE
     err = database.DB.QueryRow(
-        "SELECT id FROM users WHERE email = ?",
+        "SELECT id FROM users WHERE BINARY email = ?",
         email,
     ).Scan(&tmp)
 
@@ -169,12 +169,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
     var id int
     var hashed string
+    var officialUsername string
 
     err := database.DB.QueryRow(
-        `SELECT id, password FROM users WHERE username = ? OR email = ?`,
+        `SELECT id, password, username FROM users WHERE BINARY username = ? OR BINARY email = ?`,
         identifier,
         identifier,
-    ).Scan(&id, &hashed)
+    ).Scan(&id, &hashed, &officialUsername)
 
     if err != nil {
         RenderTemplate(w, "login.html", TemplateData{
@@ -201,7 +202,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
     http.SetCookie(w, &http.Cookie{
         Name:  "session",
-        Value: identifier,
+        Value: officialUsername,
         Path:  "/",
     })
 

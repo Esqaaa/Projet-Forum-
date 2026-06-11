@@ -69,3 +69,7 @@ CREATE TABLE IF NOT EXISTS message_dislikes (
     FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+ALTER TABLE users ADD COLUMN biography TEXT DEFAULT '';
+ALTER TABLE users ADD COLUMN avatar_url VARCHAR(255) DEFAULT '/static/uploads/default-avatar.png';
+ALTER TABLE users ADD COLUMN last_login DATETIME DEFAULT CURRENT_TIMESTAMP;

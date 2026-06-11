@@ -34,12 +34,17 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
     categoryFilter := r.URL.Query().Get("category")
 
+    // --- 1. MODIFICATION DU COMPTAGE POUR LA PAGINATION ---
     var totalTopics int
     var err error 
     if categoryFilter != "" {
-        err = database.DB.QueryRow("SELECT COUNT(*) FROM topics WHERE category = ?", categoryFilter).Scan(&totalTopics)
+        // Filtre catégorie ET filtre archivage caché
+        queryCount := "SELECT COUNT(*) FROM topics WHERE category = ? AND (status != 'archivé' OR author_id = ?)"
+        err = database.DB.QueryRow(queryCount, categoryFilter, currentUserID).Scan(&totalTopics)
     } else {
-        err = database.DB.QueryRow("SELECT COUNT(*) FROM topics").Scan(&totalTopics)
+        // Uniquement filtre archivage caché
+        queryCount := "SELECT COUNT(*) FROM topics WHERE status != 'archivé' OR author_id = ?"
+        err = database.DB.QueryRow(queryCount, currentUserID).Scan(&totalTopics)
     }
     if err != nil {
         totalTopics = 0
@@ -55,6 +60,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
     offset := (currentPage - 1) * pageSize
 
+    // --- 2. MODIFICATION DE LA REQUÊTE PRINCIPALE ---
     queryStr := `
         SELECT 
             t.id, t.title, t.content, t.created_at, t.status, 
@@ -64,14 +70,17 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
     var rows *sql.Rows
     if categoryFilter != "" {
-        queryStr += `WHERE t.category = ? 
+        // On combine la catégorie et la sécurité d'archivage
+        queryStr += `WHERE t.category = ? AND (t.status != 'archivé' OR t.author_id = ?) 
                      ORDER BY t.is_pinned DESC, t.created_at DESC 
                      LIMIT ? OFFSET ?`
-        rows, err = database.DB.Query(queryStr, categoryFilter, pageSize, offset)
+        rows, err = database.DB.Query(queryStr, categoryFilter, currentUserID, pageSize, offset)
     } else {
-        queryStr += `ORDER BY t.is_pinned DESC, t.created_at DESC 
+        // Juste la sécurité d'archivage
+        queryStr += `WHERE t.status != 'archivé' OR t.author_id = ? 
+                     ORDER BY t.is_pinned DESC, t.created_at DESC 
                      LIMIT ? OFFSET ?`
-        rows, err = database.DB.Query(queryStr, pageSize, offset)
+        rows, err = database.DB.Query(queryStr, currentUserID, pageSize, offset)
     }
 
     if err != nil {
@@ -109,16 +118,16 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
     categories := []string{"Sport", "Musique", "Automobile", "Aviation", "Sciences", "Informatique"}
     
     data := map[string]interface{}{
-        "Topics":        topics,
-        "CurrentUserID": currentUserID,
-        "CurrentPage": currentPage,
-        "TotalPages":  totalPages,
-        "HasPrev":     currentPage > 1,
-        "HasNext":     currentPage < totalPages,
-        "PrevPage":    currentPage - 1,
-        "NextPage":    currentPage + 1,
+        "Topics":           topics,
+        "CurrentUserID":    currentUserID,
+        "CurrentPage":      currentPage,
+        "TotalPages":       totalPages,
+        "HasPrev":          currentPage > 1,
+        "HasNext":          currentPage < totalPages,
+        "PrevPage":         currentPage - 1,
+        "NextPage":         currentPage + 1,
         "SelectedCategory": categoryFilter,
-        "Categories": categories,
+        "Categories":       categories,
     }
 
     RenderTemplate(w, "index.html", data)
