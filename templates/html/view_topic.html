@@ -34,16 +34,8 @@
             <!-- BOUTONS ADMIN OU AUTEUR -->
             <div style="display:flex; gap:10px;">
 
-                <!-- ADMIN : supprimer -->
-                {{if eq .User.Role "admin"}}
-                <a href="/topic/delete?id={{.Topic.ID}}" class="delete-topic-btn"
-                   onclick="return confirm('Supprimer ce topic ?')">
-                    <i class="fa-solid fa-trash"></i> Supprimer (admin)
-                </a>
-                {{end}}
-
                 <!-- AUTEUR : supprimer -->
-                {{if eq .CurrentUserID .Topic.AuthorID}}
+                {{if or (eq .User.Role "admin") (eq .CurrentUserID .Topic.AuthorID)}}
                 <a href="/topic/delete?id={{.Topic.ID}}" class="delete-topic-btn"
                    onclick="return confirm('Supprimer ce topic et tous ses messages ?')">
                     <i class="fa-solid fa-trash"></i> Supprimer
