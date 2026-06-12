@@ -10,6 +10,13 @@
     margin-bottom: 40px;
 }
 
+.title {
+    text-align: center;
+    font-size: 50px;
+    color: red;
+    text-decoration: underline;
+}
+
 .admin-table th, .admin-table td {
     border: 1px solid rgba(255,255,255,0.1);
     padding: 10px;
@@ -29,4 +36,10 @@
     padding: 6px 12px;
     border-radius: 5px;
     text-decoration: none;
+}
+
+.back-link {
+    color: #6384ff;
+    text-decoration: none;
+    font-size: 0.9rem;
 }
