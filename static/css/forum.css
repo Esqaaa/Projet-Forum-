@@ -167,10 +167,26 @@ body {
 }
 
 .delete-topic-btn {
+    display: flex;
+    gap: 6px;
     color: #ff6363;
+    font-weight: 600;
     text-decoration: none;
     font-size: 0.8rem;
-    padding: 8px 12px;
+    padding: 8px 14px;
+    border: 1px solid #ff6363;
+    border-radius: 5px;
+    background: rgba(255,99,99,0.05);
+}
+
+.modif-topic-btn {
+    display: flex;
+    gap: 6px;
+    color: #AB8349;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.8rem;
+    padding: 8px 14px;
     border: 1px solid #ff6363;
     border-radius: 5px;
     background: rgba(255,99,99,0.05);

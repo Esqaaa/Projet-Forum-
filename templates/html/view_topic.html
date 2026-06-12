@@ -33,7 +33,7 @@
             <div style="display:flex; gap:10px; align-items: center;">
 
                 {{if or .IsOwner (eq .User.Role "admin")}}
-                <a href="/topic/edit?id={{.Topic.ID}}" class="btn-main" style="padding: 8px 14px; font-size: 0.85rem; background: rgba(99, 132, 255, 0.15); border: 1px solid #6384ff; color: #6384ff; text-decoration: none; border-radius: 6px;">
+                <a href="/topic/edit?id={{.Topic.ID}}" class="modif-topic-btn">
                     <i class="fa-solid fa-pen"></i> Modifier
                 </a>
                 {{end}}
@@ -157,7 +157,7 @@
             {{if or (eq .Topic.Status "fermé") (eq .Topic.Status "archivé")}}
             <div class="topic-locked">
                 <i class="fa-solid fa-lock"></i><br>
-                Ce sujet est <strong>{{.Topic.Status}}</strong>. Les interactions sont désactivées.
+                Ce sujet est <strong>{{.Topic.Status}}</strong>. Les intéractions sont désactivées.
             </div>
 
             {{else}}
