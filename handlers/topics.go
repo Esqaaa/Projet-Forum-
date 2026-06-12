@@ -110,6 +110,11 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
 
     user, _ := GetLoggedUser(r)
 
+    sortParam := r.URL.Query().Get("sort")
+    if sortParam == "" {
+        sortParam = "chrono" // Par défaut : plus récents au plus anciens
+	}
+
     var t models.Topic
     var rawDate []byte
     var imageURL sql.NullString
@@ -155,16 +160,32 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     t.CreatedAt = string(rawDate)
     t.Date = string(rawDate)
 
-    rows, err := database.DB.Query(`
-		SELECT m.id, m.content, m.created_at, u.username, m.author_id,
-		       (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id) AS likes_count,
-		       (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id AND user_id = ?) AS has_liked,
-		       (SELECT COUNT(*) FROM message_dislikes WHERE message_id = m.id) AS dislikes_count,
-		       (SELECT COUNT(*) FROM message_dislikes WHERE message_id = m.id AND user_id = ?) AS has_disliked
-		FROM messages m 
-		JOIN users u ON m.author_id = u.id 
-		WHERE m.topic_id = ? 
-		ORDER BY m.created_at ASC`, currentUserID, currentUserID, topicID)
+    var commentsQuery string
+    if sortParam == "popular" {
+        commentsQuery = `
+            SELECT m.id, m.content, m.created_at, u.username, m.author_id,
+                   (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id) AS likes_count,
+                   (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id AND user_id = ?) AS has_liked,
+                   (SELECT COUNT(*) FROM message_dislikes WHERE message_id = m.id) AS dislikes_count,
+                   (SELECT COUNT(*) FROM message_dislikes WHERE message_id = m.id AND user_id = ?) AS has_disliked
+            FROM messages m 
+            JOIN users u ON m.author_id = u.id 
+            WHERE m.topic_id = ? 
+            ORDER BY (likes_count - dislikes_count) DESC, m.created_at DESC`
+    } else {
+        commentsQuery = `
+            SELECT m.id, m.content, m.created_at, u.username, m.author_id,
+                   (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id) AS likes_count,
+                   (SELECT COUNT(*) FROM message_likes WHERE message_id = m.id AND user_id = ?) AS has_liked,
+                   (SELECT COUNT(*) FROM message_dislikes WHERE message_id = m.id) AS dislikes_count,
+                   (SELECT COUNT(*) FROM message_dislikes WHERE message_id = m.id AND user_id = ?) AS has_disliked
+            FROM messages m 
+            JOIN users u ON m.author_id = u.id 
+            WHERE m.topic_id = ? 
+            ORDER BY m.created_at DESC`
+    }
+
+    rows, err := database.DB.Query(commentsQuery, currentUserID, currentUserID, topicID)
     
     if err == nil {
         defer rows.Close()
@@ -189,12 +210,14 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
         comments = append(comments, c)
     }
 
+
     data := map[string]interface{}{
         "Topic":         t,
         "Comments":      comments,
         "CurrentUserID": currentUserID,
         "IsOwner":       isOwner,
         "User":          user,
+        "Sort":          sortParam,
     }
     RenderTemplate(w, r, "view_topic.html", data)
 }

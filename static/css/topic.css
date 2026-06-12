@@ -32,3 +32,55 @@
     color: #bc84ee;
 }
 
+/* --- FT-8 : Alignement de la section commentaires --- */
+.comments-header-container {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 25px; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); 
+    padding-bottom: 10px;
+}
+
+.filter-wrapper {
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+}
+
+.filter-wrapper label {
+    color: #8a9fc4; 
+    font-size: 0.85rem;
+}
+
+/* --- Style du Menu Déroulant Glassmorphism --- */
+.custom-select-forum {
+    background: rgba(255, 255, 255, 0.07); 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+    border-radius: 6px; 
+    color: #fff; 
+    padding: 6px 12px; 
+    font-size: 0.85rem; 
+    outline: none; 
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 30px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' fill='white'><polyline points='0,10 20,30 40,10'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px top 55%;
+    background-size: 10px;
+    transition: all 0.2s ease;
+}
+
+.custom-select-forum:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Fix pour l'arrière-plan du menu déroulé (XAMPP/Chrome) */
+.custom-select-forum option {
+    background-color: #1a1c2e; /* Couleur sombre qui match avec ton fond */
+    color: #fff;
+    padding: 10px;
+}

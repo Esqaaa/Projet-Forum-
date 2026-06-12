@@ -57,17 +57,17 @@
             <div class="status-actions">
                 <a href="/topic/update-status?id={{.Topic.ID}}&status=ouvert"
                    class="status-btn status-open {{if eq .Topic.Status "ouvert"}}status-active{{end}}">
-                    Ouvert
+                     Ouvert
                 </a>
 
                 <a href="/topic/update-status?id={{.Topic.ID}}&status=fermé"
                    class="status-btn status-closed {{if eq .Topic.Status "fermé"}}status-active{{end}}">
-                    Fermé
+                     Fermé
                 </a>
 
                 <a href="/topic/update-status?id={{.Topic.ID}}&status=archivé"
                    class="status-btn status-archived {{if eq .Topic.Status "archivé"}}status-active{{end}}">
-                    Archivé
+                     Archivé
                 </a>
             </div>
 
@@ -87,8 +87,17 @@
 
         <div class="comments-section">
 
-            <h3><i class="fa-regular fa-comments"></i> Commentaires</h3>
-
+            <div class="comments-header-container">
+                <h3><i class="fa-regular fa-comments"></i> Commentaires</h3>
+                
+                <div class="filter-wrapper">
+                    <label for="sortComments"><i class="fa-solid fa-filter"></i> Filtrer :</label>
+                    <select id="sortComments" onchange="location = this.value;" class="custom-select-forum">
+                        <option value="/topic/view?id={{.Topic.ID}}&sort=chrono" {{if eq .Sort "chrono"}}selected{{end}}>Plus récents d'abord</option>
+                        <option value="/topic/view?id={{.Topic.ID}}&sort=popular" {{if eq .Sort "popular"}}selected{{end}}>Plus populaires (Score)</option>
+                    </select>
+                </div>
+            </div>
             {{range .Comments}}
             <div class="comment-card">
 
