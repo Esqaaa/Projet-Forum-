@@ -358,64 +358,127 @@ func PinTopicHandler(w http.ResponseWriter, r *http.Request) {
     http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+type EditTopicData struct {
+    Topic         models.Topic
+    CurrentUserID int
+    User          models.User
+}
+
 func EditTopicHandler(w http.ResponseWriter, r *http.Request) {
-	user, _ := GetLoggedUser(r)
-	if user.ID == 0 {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
-	}
+    user, _ := GetLoggedUser(r)
+    if user.ID == 0 {
+        http.Redirect(w, r, "/login", http.StatusSeeOther)
+        return
+    }
 
-	// Récupération de l'ID 
-	topicID := r.URL.Query().Get("id")
-	if topicID == "" {
-		topicID = r.FormValue("topic_id")
-	}
+    // Récupération de l'ID du topic
+    topicID := r.URL.Query().Get("id")
+    if topicID == "" {
+        topicID = r.FormValue("topic_id")
+    }
 
-	// On récupère l'auteur original du topic
-	var t models.Topic
-	err := database.DB.QueryRow("SELECT id, title, content, category, author_id FROM topics WHERE id = ?", topicID).Scan(
-		&t.ID, &t.Title, &t.Content, &t.Category, &t.AuthorID,
-	)
-	if err != nil {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
+    // Récupération du topic
+    var t models.Topic
+    var image sql.NullString
 
-	// Vérification critique des droits (Propriétaire ou admin)
-	if user.ID != t.AuthorID && user.Role != "admin" {
-		http.Error(w, "Action non autorisée : Vous n'êtes pas l'auteur de ce sujet.", http.StatusForbidden)
-		return
-	}
+    err := database.DB.QueryRow(`
+        SELECT id, title, content, category, author_id, image_url
+        FROM topics WHERE id = ?`,
+        topicID,
+    ).Scan(
+        &t.ID, &t.Title, &t.Content, &t.Category, &t.AuthorID, &image,
+    )
 
-	// On envoie vers un formulaire de modification
-	if r.Method == http.MethodGet {
-		data := map[string]interface{}{
-			"Topic":         t,
-			"CurrentUserID": user.ID,
-            "USer":          user,
-		}
-		RenderTemplate(w, r, "edit_topic.html", data)
-		return
-	}
+    if err != nil {
+        http.Redirect(w, r, "/", http.StatusSeeOther)
+        return
+    }
 
-	// On valide les modifications du formulaire
-	if r.Method == http.MethodPost {
-		title := r.FormValue("title")
-		content := r.FormValue("content")
-		category := r.FormValue("category")
+    if image.Valid {
+        t.ImageURL = image.String
+    }
 
-		if title == "" || content == "" {
-			http.Error(w, "Le titre et le contenu ne peuvent pas être vides.", http.StatusBadRequest)
-			return
-		}
+    // Vérification des droits
+    if user.ID != t.AuthorID && user.Role != "admin" {
+        http.Error(w, "Action non autorisée", http.StatusForbidden)
+        return
+    }
 
-		_, err = database.DB.Exec("UPDATE topics SET title = ?, content = ?, category = ? WHERE id = ?", title, content, category, topicID)
-		if err != nil {
-			http.Error(w, "Erreur lors de la mise à jour en BDD", 500)
-			return
-		}
+    // --------------------------
+    //  GET → afficher le formulaire
+    // --------------------------
+    if r.Method == http.MethodGet {
+        data := EditTopicData{
+            Topic:         t,
+            CurrentUserID: user.ID,
+            User:          user,
+        }
 
-		http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
-		return
-	}
+        RenderTemplate(w, r, "edit_topic.html", data)
+        return
+    }
+
+    // --------------------------
+    //  POST → traiter la modification
+    // --------------------------
+    if r.Method == http.MethodPost {
+
+        title := r.FormValue("title")
+        content := r.FormValue("content")
+        category := r.FormValue("category")
+
+        if title == "" || content == "" {
+            http.Error(w, "Le titre et le contenu ne peuvent pas être vides.", http.StatusBadRequest)
+            return
+        }
+
+        // --------------------------
+        // 1) Suppression d’image
+        // --------------------------
+        if r.FormValue("delete_image") == "1" {
+            _, _ = database.DB.Exec(`
+                UPDATE topics SET image_url = NULL WHERE id = ?
+            `, topicID)
+        }
+
+        // --------------------------
+        // 2) Upload d’une nouvelle image
+        // --------------------------
+        file, header, err := r.FormFile("image")
+        if err == nil && header != nil {
+            defer file.Close()
+
+            // Générer un nom unique
+            filename := fmt.Sprintf("%d_%s", time.Now().Unix(), header.Filename)
+
+            // Sauvegarde dans /uploads/
+            out, err := os.Create("uploads/" + filename)
+            if err == nil {
+                defer out.Close()
+                io.Copy(out, file)
+
+                // Mise à jour en BDD
+                _, _ = database.DB.Exec(`
+                    UPDATE topics SET image_url = ? WHERE id = ?
+                `, filename, topicID)
+            }
+        }
+
+        // --------------------------
+        // 3) Mise à jour du texte
+        // --------------------------
+        _, err = database.DB.Exec(`
+            UPDATE topics SET title = ?, content = ?, category = ?
+            WHERE id = ?
+        `, title, content, category, topicID)
+
+        if err != nil {
+            http.Error(w, "Erreur lors de la mise à jour", 500)
+            return
+        }
+
+        // Redirection finale
+        http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+        return
+    }
 }

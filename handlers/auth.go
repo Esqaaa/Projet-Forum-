@@ -19,31 +19,31 @@ type TemplateData struct {
     Email      string
 }
 
-func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, data map[string]interface{}) {
+func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, data interface{}) {
     // Récupérer l'utilisateur connecté
     user, _ := GetLoggedUser(r)
 
-    if data == nil {
-        data = map[string]interface{}{}
+    // Si data est un map, on injecte User dedans
+    if m, ok := data.(map[string]interface{}); ok {
+        m["User"] = user
     }
-
-    data["User"] = user
 
     t, err := template.ParseFiles(
         "templates/html/layout.html",
-        "templates/html/"+tmpl,
+        "templates/html/" + tmpl,
     )
     if err != nil {
-        http.Error(w, err.Error(), 500)
+        http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
 
     err = t.ExecuteTemplate(w, "layout", data)
     if err != nil {
-        http.Error(w, err.Error(), 500)
+        http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
 }
+
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method == "GET" {
