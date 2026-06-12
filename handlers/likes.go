@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// Like des commentaires 
 func LikeMessageHandler(w http.ResponseWriter, r *http.Request) {
 	userID := GetLoggedUserID(r)
 	if userID == 0 {
@@ -30,6 +31,7 @@ func LikeMessageHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/topic/view?id="+topicIDStr, http.StatusSeeOther)
 }
 
+// Dislike des commentaires 
 func DislikeMessageHandler(w http.ResponseWriter, r *http.Request) {
 	userID := GetLoggedUserID(r)
 	if userID == 0 {

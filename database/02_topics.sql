@@ -1,5 +1,3 @@
--- Fichier SQL pour la mission FT-3 - Création d'un topic
-
 -- Création de la table "topics"
 CREATE TABLE IF NOT EXISTS topics (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -7,11 +5,10 @@ CREATE TABLE IF NOT EXISTS topics (
     content TEXT NOT NULL, 
     tags VARCHAR(255), 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP, 
-    author_id INT NOT NULL, 
+    author_id INT NOT NULL,
+    is_pinned BOOLEAN DEFAULT 0,
+    category TEXT NOT NULL DEFAULT 'Général',
+    image_url TEXT, 
     status ENUM('ouvert', 'fermé', 'archivé') DEFAULT 'ouvert', 
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE 
 );
-
-
-ALTER TABLE topics ADD COLUMN is_pinned BOOLEAN DEFAULT 0;
-ALTER TABLE topics ADD COLUMN image_url TEXT;

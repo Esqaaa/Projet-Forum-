@@ -1,3 +1,4 @@
+// Initialiser le serveur go ainsi que la table SQL hébergée avec XAMMP
 package database
 
 import (

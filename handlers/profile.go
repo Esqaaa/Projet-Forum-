@@ -24,7 +24,6 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	var bio sql.NullString
 	var avatar sql.NullString
 
-	// Récupération des infos de l'utilisateur
 	queryUser := "SELECT id, username, email, biography, avatar_url, last_login FROM users WHERE id = ?"
 	err := database.DB.QueryRow(queryUser, currentUserID).Scan(&p.ID, &p.Username, &p.Email, &bio, &avatar, &rawDate)
 	if err != nil {
@@ -33,7 +32,6 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Gestion des valeurs NULL ou vides pour l'affichage
 	if bio.Valid { p.Biography = bio.String }
 	if avatar.Valid && avatar.String != "" { 
 		p.AvatarURL = avatar.String 
@@ -42,10 +40,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	p.LastLogin = string(rawDate)
 
-	// Calcul du nombre de topics créés
 	database.DB.QueryRow("SELECT COUNT(*) FROM topics WHERE author_id = ?", currentUserID).Scan(&p.TopicsCount)
-
-	// Calcul du nombre de messages envoyés
 	database.DB.QueryRow("SELECT COUNT(*) FROM messages WHERE author_id = ?", currentUserID).Scan(&p.CommentCount)
 
 	status := r.URL.Query().Get("status")
@@ -59,7 +54,6 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, r, "profile.html", data)
 }
 
-// UpdateProfileHandler enregistre les modifications (Bio, Email, Photo)
 func UpdateProfileHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Redirect(w, r, "/profile", http.StatusSeeOther)
@@ -78,31 +72,25 @@ func UpdateProfileHandler(w http.ResponseWriter, r *http.Request) {
 	newEmail := r.FormValue("email")
 	newBio := r.FormValue("biography")
 
-	// Récupération de l'ancienne image pour ne pas l'écraser si l'utilisateur n'envoie rien
 	var currentAvatar string
 	database.DB.QueryRow("SELECT avatar_url FROM users WHERE id = ?", currentUserID).Scan(&currentAvatar)
 
-	// Gestion de l'upload de la photo de profil
 	file, handler, err := r.FormFile("avatar")
 	if err == nil {
 		defer file.Close()
 		
-		// On crée un nom unique pour l'image
 		fileName := fmt.Sprintf("avatar-%d-%s", time.Now().Unix(), handler.Filename)
 		imagePath := "/static/uploads/" + fileName
-		
-		// On s'assure que le dossier static/uploads existe
 		os.MkdirAll("./static/uploads", os.ModePerm)
 
 		dst, err := os.Create("./" + imagePath)
 		if err == nil {
 			defer dst.Close()
 			io.Copy(dst, file)
-			currentAvatar = imagePath // On remplace par le nouveau chemin
+			currentAvatar = imagePath 
 		}
 	}
 
-	// Mise à jour dans la base de données
 	query := "UPDATE users SET email = ?, biography = ?, avatar_url = ? WHERE id = ?"
 	_, err = database.DB.Exec(query, newEmail, newBio, currentAvatar, currentUserID)
 	if err != nil {

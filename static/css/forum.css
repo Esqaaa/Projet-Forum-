@@ -1,3 +1,4 @@
+/* Style principal du site */
 body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
@@ -27,11 +28,13 @@ body {
 
 .topic-card {
     position: relative;
-    background: rgba(255, 255, 255, 0.1);
     margin-bottom: 20px;
-    padding: 20px;
-    border-radius: 10px;
     transition: transform 0.2s;
+
+    padding: 20px;
+    border-radius: 8px; 
+    background: rgba(255,255,255,0.03); 
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
 .topic-card:hover {
@@ -132,11 +135,6 @@ body {
     font-size: 0.9rem;
 }
 
-.topic-title {
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
 .topic-title-open {
     color: #bc84ee;
 }
@@ -153,8 +151,9 @@ body {
 .topic-meta {
     display: flex;
     gap: 15px;
+    justify-content: space-between;
     font-size: 0.8rem;
-    opacity: 0.5;
+    opacity: 0.6;
     align-items: center;
 }
 
@@ -187,7 +186,7 @@ body {
     text-decoration: none;
     font-size: 0.8rem;
     padding: 8px 14px;
-    border: 1px solid #ff6363;
+    border: 1px solid #AB8349;
     border-radius: 5px;
     background: rgba(255,99,99,0.05);
 }
@@ -429,7 +428,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 10px 15px;
-    margin-bottom: 15px;
+    margin-bottom: 25px; 
     background: #1a1a40;
     border: 1px solid rgba(255,255,255,0.05);
     border-radius: 8px;
@@ -455,6 +454,7 @@ body {
     font-size: 0.75rem;
     font-weight: bold;
     text-decoration: none;
+    margin-left: 10px;
 }
 
 .tub-right .logout-btn {
@@ -494,4 +494,274 @@ body {
 
 .create-btn:hover {
     background: #7b96ff;
+}
+
+.tub-left .user-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* --- HEADER SEARCH RESULT --- */
+.search-header {
+    margin-bottom: 25px;
+}
+
+.search-back-link {
+    color: #6384ff;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.search-title {
+    margin-top: 15px;
+    color: #bc84ee;
+}
+
+.search-title-category {
+    font-size: 1.2rem;
+    color: #fff;
+    opacity: 0.5;
+}
+
+.search-count {
+    opacity: 0.6;
+    font-size: 0.9rem;
+}
+
+/* --- CATEGORY FILTER BAR --- */
+.category-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    background: rgba(255,255,255,0.03);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.category-pill {
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.category-pill-all {
+    border: 1px solid #bc84ee;
+    color: #bc84ee;
+}
+
+.category-pill-all.active {
+    background: #bc84ee;
+    color: black;
+    font-weight: bold;
+}
+
+.category-pill-item {
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    opacity: 0.8;
+}
+
+.category-pill-item.active {
+    background: white;
+    color: black;
+    font-weight: bold;
+    border-color: white;
+}
+
+/* --- TOPIC CARD --- */
+.topic-wrapper {
+    position: relative;
+}
+
+.topic-card {
+    padding: 20px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.topic-card.pinned {
+    border-left: 4px solid #bc84ee;
+}
+
+.topic-title {
+    margin-bottom: 10px;
+    padding-left: 20px;
+    color: #bc84ee;
+}
+
+.topic-title.pinned {
+    color: #FFA800;
+}
+
+.topic-category-badge {
+    font-size: 0.75rem;
+    font-weight: normal;
+    background: rgba(255,255,255,0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+    color: #fff;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+.topic-content {
+    margin-bottom: 15px;
+}
+
+.topic-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+/* --- EMPTY RESULT --- */
+.no-result {
+    text-align: center;
+    opacity: 0.5;
+    font-style: italic;
+    margin-top: 40px;
+}
+
+.no-result-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.search-wrapper {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    flex-grow: 1;
+    max-width: 450px;
+    margin: 0;
+    min-width: 200px;
+}
+
+.search-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 12px 10px 35px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: white;
+    font-family: inherit;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    height: 38px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.4;
+    font-size: 0.85rem;
+}
+
+.category-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    background: rgba(255,255,255,0.03);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.category-pill {
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.category-pill-all {
+    border: 1px solid #bc84ee;
+    color: white;
+    background: transparent; 
+    transition: all 0.2s ease; 
+}
+
+.category-pill-all.active {
+    background: #bc84ee;
+    color: black;
+    font-weight: bold;
+}
+
+.category-pill-item {
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    opacity: 0.8;
+}
+
+.category-pill-item.active {
+    background: white;
+    color: black;
+    font-weight: bold;
+    border-color: white;
+}
+
+/* --- TOPICS LIST --- */
+.pin-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
+.topic-card.pinned {
+    border-left: 4px solid #bc84ee;
+}
+
+.topic-title {
+    margin-bottom: 10px;
+    padding-left: 20px;
+}
+
+.topic-title.closed {
+    color: #ff4a4a;
+}
+
+.topic-title.pinned {
+    color: #FFA800;
+}
+
+.topic-title.default {
+    color: #bc84ee;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 40px;
+    font-size: 0.9rem;
+}
+
+.pagination-btn {
+    color: #6384ff;
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid rgba(99, 132, 255, 0.3);
+    border-radius: 5px;
+    background: rgba(99, 132, 255, 0.05);
+}
+
+.pagination-btn.disabled {
+    opacity: 0.3;
+    border: 1px solid rgba(255,255,255,0.05);
 }

@@ -1,6 +1,4 @@
-CREATE DATABASE IF NOT EXISTS forum_project;
-USE forum_project;
-
+-- Création de la table "users"
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
 

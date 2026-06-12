@@ -4,52 +4,74 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <div class="container">
-    <div style="margin-bottom: 25px;">
-        <a href="/" style="color:#6384ff; text-decoration:none; font-size:0.9rem;">← Retour à l'accueil</a>
-        <h1 style="margin-top: 15px; color: #bc84ee;">
-            Résultats pour : "{{.Query}}" 
-            {{if .SelectedCategory}}<span style="font-size: 1.2rem; color: #fff; opacity: 0.5;">(dans {{.SelectedCategory}})</span>{{end}}
+
+    <div class="search-header">
+        <a href="/" class="search-back-link">← Retour à l'accueil</a>
+
+        <h1 class="search-title">
+            Résultats pour : "{{.Query}}"
+            {{if .SelectedCategory}}
+                <span class="search-title-category">(dans {{.SelectedCategory}})</span>
+            {{end}}
         </h1>
-        <p style="opacity: 0.6; font-size: 0.9rem;">{{len .Topics}} sujet(s) trouvé(s)</p>
+
+        <p class="search-count">{{len .Topics}} sujet(s) trouvé(s)</p>
     </div>
 
-    <div style="display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-        <a href="/search?q={{.Query}}" style="text-decoration: none; font-size: 0.85rem; padding: 6px 12px; border-radius: 20px; border: 1px solid #bc84ee; {{if eq .SelectedCategory ""}}background: #bc84ee; color: black; font-weight: bold;{{else}}color: #bc84ee;{{end}}">
+
+    <div class="category-bar">
+        <a href="/search?q={{.Query}}" 
+           class="category-pill category-pill-all {{if eq .SelectedCategory ""}}active{{end}}">
             Tout voir
         </a>
+
         {{range .Categories}}
-        <a href="/search?q={{$.Query}}&category={{.}}" style="text-decoration: none; font-size: 0.85rem; padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); {{if eq $.SelectedCategory .}}background: white; color: black; font-weight: bold; border-color: white;{{else}}color: white; opacity: 0.8;{{end}}">
+        <a href="/search?q={{$.Query}}&category={{.}}" 
+           class="category-pill category-pill-item {{if eq $.SelectedCategory .}}active{{end}}">
             {{.}}
         </a>
         {{end}}
     </div>
 
+
     <div class="topics-list">
         {{range .Topics}}
-        <div style="position: relative;">
+        <div class="topic-wrapper">
+
             <a href="/topic/view?id={{.ID}}" class="topic-link">
-                <div class="topic-card" style="{{if .IsPinned}}border-left: 4px solid #bc84ee;{{end}}">
-                    <h3 style="margin-bottom: 10px; padding-left: 20px; color: {{if .IsPinned}}#FFA800{{else}}#bc84ee{{end}};">
-                        {{if .IsPinned}}<i class="fa-solid fa-thumbtack" style="font-size: 0.95rem; margin-right: 5px;"></i>{{end}}
+                <div class="topic-card {{if .IsPinnedByUser}}pinned{{end}}">
+
+                    <h3 class="topic-title {{if .IsPinnedByUser}}pinned{{end}}">
+                        {{if .IsPinnedByUser}}
+                            <i class="fa-solid fa-thumbtack"></i>
+                        {{end}}
                         {{.Title}}
-                        <span style="font-size: 0.75rem; font-weight: normal; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 10px; color: #fff; margin-left: 10px; vertical-align: middle;">
+
+                        <span class="topic-category-badge">
                             {{.Category}}
                         </span>
                     </h3>
-                    <p style="margin-bottom: 15px;">{{.Content}}</p>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.6;">
+
+                    <p class="topic-content">{{.Content}}</p>
+
+                    <div class="topic-meta">
                         <div>Par <strong>{{.Author}}</strong></div>
                         <div>{{.CreatedAt}}</div>
                     </div>
+
                 </div>
             </a>
+
         </div>
         {{else}}
-        <p style="text-align: center; opacity: 0.5; font-style: italic; margin-top: 40px;">
-            <i class="fa-solid fa-magnifying-glass-blur" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
+
+        <p class="no-result">
+            <i class="fa-solid fa-magnifying-glass-blur no-result-icon"></i>
             Aucun sujet ne correspond à votre recherche...
         </p>
+
         {{end}}
     </div>
+
 </div>
 {{end}}

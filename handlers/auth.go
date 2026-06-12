@@ -12,6 +12,7 @@ import (
     "golang.org/x/crypto/bcrypt"
 )
 
+// Structure pour garder en mémoire les inputs 
 type TemplateData struct {
     Errors     []string
     Identifier string
@@ -20,10 +21,8 @@ type TemplateData struct {
 }
 
 func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, data interface{}) {
-    // Récupérer l'utilisateur connecté
     user, _ := GetLoggedUser(r)
 
-    // Si data est un map, on injecte User dedans
     if m, ok := data.(map[string]interface{}); ok {
         m["User"] = user
     }
@@ -196,7 +195,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Mise à jour du last_login
     _, err = database.DB.Exec("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?", id)
     if err != nil {
         fmt.Println("Erreur lors de la mise à jour de last_login :", err)

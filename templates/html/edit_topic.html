@@ -5,12 +5,9 @@
 <form method="POST" action="/topic/edit" enctype="multipart/form-data" class="large-form">
 
     <h1>MODIFIER LE SUJET</h1>
-
     <input type="hidden" name="topic_id" value="{{.Topic.ID}}">
 
-    <!-- Ligne Titre + Catégorie -->
     <div class="row-flex">
-
         <div class="input-group half">
             <i class="fa-solid fa-heading icon"></i>
             <input type="text" name="title" value="{{.Topic.Title}}" required>
@@ -30,15 +27,12 @@
         </div>
 
     </div>
-
     </div>
 
-    <!-- Contenu -->
     <div class="input-group textarea-group">
         <textarea name="content" rows="8" required>{{.Topic.Content}}</textarea>
     </div>
 
-    <!-- Boutons -->
     <button type="submit">Enregistrer</button>
 
     <a href="/topic/view?id={{.Topic.ID}}" 

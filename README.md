@@ -55,10 +55,10 @@ Le site est désormais accessible localement sur votre navigateur (généralemen
 │       01_users.sql
 │       02_topics.sql
 │       03_messages.sql
-│       04_tools.sql
+│       04_tools.sql        // Outil de suppression
 │       07_likes.sql
 │       init.go
-│       shema.sql
+│       shema.sql           // Importer toutes les tables en une requête 
 │       
 ├─── handlers
 │       admin.go
@@ -112,6 +112,25 @@ Conformément aux exigences, voici la séparation des routes de l'application:
 - POST /message/post : Envoi d'un message dans un topic   
 - POST /like : Gestion des likes et dislikes sur les messages   
 - POST /admin/action : Actions de modération (Bannissement, suppression, modification d'état)   
+
+## 🔧 Fonctionnalités : 
+1. **FT‑1 : Inscription**  
+2. **FT‑2 : Connexion**  
+3. **FT‑3 : Création de topic**  
+4. **FT‑4 : Consulter un topic**  
+5. **FT‑5 : Poster un message dans un topic**  
+6. **FT‑6 : Gestion des messages et du topic**  
+7. **FT‑7 : Likes & Dislikes**  
+8. **FT‑8 : Trier les messages**  
+9. **FT‑9 : Pagination**  
+10. **FT‑10 : Afficher les topics par catégorie**  
+11. **FT‑11 : Dashboard Admin**  
+12. **FT‑12 : Barre de recherche**
+
+## 🌟 Fonctionnalités Bonus :
+
+- **FTB‑1 : Gestion des images**  
+- **FTB‑2 : Création & gestion de profil**
 
 ## ⚡ Méthodologie & Usage de l'IA (Vibe Coding)
 Pour ce projet, nous avons adopté une approche moderne de Vibe Coding en collaborant activement avec des Intelligences Artificielles de pointe : *Copilot, Gemini et ChatGPT*.
