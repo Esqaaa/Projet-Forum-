@@ -23,7 +23,7 @@
 
         <div class="tub-right">
             {{if .User.ID}}
-                <a href="/logout" class="logout-btn">Déconnexion</a>
+                <a href="/profile" class="logout-btn">Mon Profil</a>
             {{else}}
                 <a href="/login" class="logout-btn">Connexion</a>
             {{end}}
@@ -53,10 +53,6 @@
 
         <div style="display: flex; align-items: center; gap: 10px; white-space: nowrap;">
             <a href="/topic/create" class="btn-main" style="margin: 0; height: 38px; display: inline-flex; align-items: center; box-sizing: border-box;">Créer un sujet</a>
-            
-            <a href="/profile" class="btn-profile-icon" title="Mon Profil / Paramètres">
-                <i class="fa-solid fa-user-gear"></i>
-            </a>
         </div>
     </div>
 

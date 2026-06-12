@@ -7,7 +7,6 @@
 <div class="container">
     <div class="glass-card">
 
-        <!-- HEADER DU TOPIC -->
         <div class="topic-header">
 
             <div>
@@ -31,22 +30,25 @@
                 </div>
             </div>
 
-            <!-- BOUTONS ADMIN OU AUTEUR -->
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:10px; align-items: center;">
 
-                <!-- AUTEUR : supprimer -->
+                {{if or .IsOwner (eq .User.Role "admin")}}
+                <a href="/topic/edit?id={{.Topic.ID}}" class="btn-main" style="padding: 8px 14px; font-size: 0.85rem; background: rgba(99, 132, 255, 0.15); border: 1px solid #6384ff; color: #6384ff; text-decoration: none; border-radius: 6px;">
+                    <i class="fa-solid fa-pen"></i> Modifier
+                </a>
+                {{end}}
+
                 {{if or (eq .User.Role "admin") (eq .CurrentUserID .Topic.AuthorID)}}
                 <a href="/topic/delete?id={{.Topic.ID}}" class="delete-topic-btn"
-                   onclick="return confirm('Supprimer ce topic et tous ses messages ?')">
-                    <i class="fa-solid fa-trash"></i> Supprimer
+                    onclick="return confirm('Supprimer ce topic et tous ses messages ?')">
+                     <i class="fa-solid fa-trash"></i> Supprimer
                 </a>
                 {{end}}
 
             </div>
 
-        </div> <!-- FIN HEADER -->
+        </div> 
 
-        <!-- BLOC CHANGEMENT DE STATUT (Auteur + Admin) -->
         {{if or (eq .CurrentUserID .Topic.AuthorID) (eq .User.Role "admin")}}
         <div class="admin-panel">
 
@@ -72,7 +74,6 @@
         </div>
         {{end}}
 
-        <!-- CONTENU DU TOPIC -->
         <div class="topic-content">{{.Topic.Content}}</div>
 
         {{if .Topic.ImageURL}}
@@ -84,7 +85,6 @@
         </div>
         {{end}}
 
-        <!-- COMMENTAIRES -->
         <div class="comments-section">
 
             <h3><i class="fa-regular fa-comments"></i> Commentaires</h3>
@@ -100,7 +100,6 @@
 
                     <div class="comment-actions">
 
-                        <!-- LIKE -->
                         <a href="/message/like?id={{.ID}}&topic_id={{$.Topic.ID}}"
                            class="like-btn {{if .HasLiked}}liked{{end}}"
                            title="Liker ce message">
@@ -108,7 +107,6 @@
                             <span class="like-count">{{.LikesCount}}</span>
                         </a>
 
-                        <!-- DISLIKE -->
                         <a href="/message/dislike?id={{.ID}}&topic_id={{$.Topic.ID}}"
                            class="dislike-btn {{if .HasDisliked}}disliked{{end}}"
                            title="Disliker ce message">
@@ -116,14 +114,12 @@
                             <span class="dislike-count">{{.DislikesCount}}</span>
                         </a>
 
-                        <!-- EDIT : auteur OU admin -->
                         {{if or (eq $.CurrentUserID .AuthorID) (eq $.User.Role "admin")}}
                         <button class="edit-btn" onclick="toggleEdit('{{.ID}}')" title="Modifier">
                             <i class="fa-solid fa-pen"></i>
                         </button>
                         {{end}}
 
-                        <!-- DELETE : auteur OU admin -->
                         {{if or (eq $.CurrentUserID .AuthorID) (eq $.User.Role "admin")}}
                         <a href="/message/delete?id={{.ID}}&topic_id={{$.Topic.ID}}"
                            class="delete-btn"
@@ -137,7 +133,6 @@
 
                 <div id="content-{{.ID}}" class="comment-content">{{.Content}}</div>
 
-                <!-- FORMULAIRE D'ÉDITION -->
                 <div id="edit-form-{{.ID}}" class="edit-form">
                     <form action="/message/edit" method="POST">
                         <input type="hidden" name="message_id" value="{{.ID}}">
@@ -156,17 +151,15 @@
 
             </div>
             {{else}}
-                <p class="no-comments">Aucun message pour le moment...</p>
+                <p class="no-comments" style="margin-bottom: 25px;">Aucun message pour le moment...</p>
             {{end}}
 
-            <!-- SI TOPIC FERMÉ -->
             {{if or (eq .Topic.Status "fermé") (eq .Topic.Status "archivé")}}
             <div class="topic-locked">
                 <i class="fa-solid fa-lock"></i><br>
                 Ce sujet est <strong>{{.Topic.Status}}</strong>. Les interactions sont désactivées.
             </div>
 
-            <!-- FORMULAIRE DE RÉPONSE -->
             {{else}}
             <h3 class="reply-title">Répondre au sujet</h3>
 

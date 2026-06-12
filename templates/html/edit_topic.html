@@ -1,0 +1,71 @@
+{{define "content"}}
+
+<link rel="stylesheet" href="/static/css/forum.css">
+<link rel="stylesheet" href="/static/css/topic.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div class="container">
+    <div class="glass-card" style="max-width: 700px; margin: 0 auto;">
+
+        <div class="topic-header" style="margin-bottom: 25px;">
+            <div>
+                <a href="/topic/view?id={{.Topic.ID}}" class="back-link">← Retour au sujet</a>
+                <h1 class="topic-title open" style="font-size: 1.8rem; margin-top: 10px;">
+                    <i class="fa-solid fa-pen" style="color: #6384ff; margin-right: 10px;"></i>Modifier le sujet
+                </h1>
+                <p style="color: #8a9fc4; font-size: 0.9rem; margin-top: 5px;">
+                    En tant qu'auteur ou administrateur, vous pouvez ajuster le titre, la catégorie et le contenu de votre message.
+                </p>
+            </div>
+        </div>
+
+        <hr style="border: 0; height: 1px; background: rgba(255, 255, 255, 0.1); margin-bottom: 25px;">
+
+        <form action="/topic/edit" method="POST" style="display: flex; flex-direction: column; gap: 20px;">
+            <input type="hidden" name="topic_id" value="{{.Topic.ID}}">
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label for="title" style="color: #fff; font-weight: 600; font-size: 0.95rem;">Titre du sujet</label>
+                <input type="text" id="title" name="title" value="{{.Topic.Title}}" required
+                       style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #fff; font-size: 1rem; outline: none; transition: border-color 0.2s;"
+                       onfocus="this.style.borderColor='#6384ff'" onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label for="category" style="color: #fff; font-weight: 600; font-size: 0.95rem;">Catégorie</label>
+                <select id="category" name="category" 
+                        style="width: 104%; padding: 12px; background: #1a1d29; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #fff; font-size: 1rem; outline: none; cursor: pointer;">
+                    <option value="Général" {{if eq .Topic.Category "Général"}}selected{{end}}>Général</option>
+                    <option value="Sport" {{if eq .Topic.Category "Sport"}}selected{{end}}>Sport</option>
+                    <option value="Musique" {{if eq .Topic.Category "Musique"}}selected{{end}}>Musique</option>
+                    <option value="Automobile" {{if eq .Topic.Category "Automobile"}}selected{{end}}>Automobile</option>
+                    <option value="Aviation" {{if eq .Topic.Category "Aviation"}}selected{{end}}>Aviation</option>
+                    <option value="Sciences" {{if eq .Topic.Category "Sciences"}}selected{{end}}>Sciences</option>
+                    <option value="Informatique" {{if eq .Topic.Category "Informatique"}}selected{{end}}>Informatique</option>
+                    <option value="Autre" {{if eq .Topic.Category "Autre"}}selected{{end}}>Autre</option>
+                </select>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label for="content" style="color: #fff; font-weight: 600; font-size: 0.95rem;">Description / Message principal</label>
+                <textarea id="content" name="content" required rows="10"
+                          style="width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #fff; font-size: 1rem; outline: none; resize: none; line-height: 1.5; transition: border-color 0.2s;"
+                          onfocus="this.style.borderColor='#6384ff'" onblur="this.style.borderColor='rgba(255, 255, 255, 0.1)'">{{.Topic.Content}}</textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                <a href="/topic/view?id={{.Topic.ID}}" class="cancel-btn" 
+                   style="padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 0.95rem; display: inline-flex; align-items: center; justify-content: center;">
+                    Annuler
+                </a>
+                <button type="submit" class="btn-main" 
+                        style="padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none;">
+                    <i class="fa-solid fa-floppy-disk" style="margin-right: 8px;"></i>Enregistrer les modifications
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+{{end}}
