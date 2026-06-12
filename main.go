@@ -32,6 +32,7 @@ func main() {
 	http.HandleFunc("/search", handlers.SearchHandler)
 	http.HandleFunc("/profile", handlers.ProfileHandler)
     http.HandleFunc("/profile/update", handlers.UpdateProfileHandler)
+	http.HandleFunc("/topic/edit", handlers.EditTopicHandler)
 
 	http.HandleFunc("/", handlers.HomeHandler)
 

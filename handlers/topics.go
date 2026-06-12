@@ -24,12 +24,6 @@ func GetLoggedUserID(r *http.Request) int {
 		return 0
 	}
 	return userID
-    
-    err = database.DB.QueryRow(query, cookie.Value, cookie.Value).Scan(&userID)
-    if err != nil {
-        return 0
-    }
-    return userID
 }
 
 func GetLoggedUser(r *http.Request) (models.User, error) {
@@ -114,6 +108,8 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
     topicID := r.URL.Query().Get("id")
     currentUserID := GetLoggedUserID(r)
 
+    user, _ := GetLoggedUser(r)
+
     var t models.Topic
     var rawDate []byte
     var imageURL sql.NullString
@@ -142,6 +138,8 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
         http.Redirect(w, r, "/", http.StatusSeeOther)
         return
     }
+
+    isOwner := currentUserID != 0 && currentUserID == t.AuthorID
 
     if t.Status == "archivé" && currentUserID != t.AuthorID {
         http.Error(w, "Ce sujet a été archivé et n'est plus accessible.", http.StatusForbidden)
@@ -195,6 +193,8 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
         "Topic":         t,
         "Comments":      comments,
         "CurrentUserID": currentUserID,
+        "IsOwner":       isOwner,
+        "User":          user,
     }
     RenderTemplate(w, r, "view_topic.html", data)
 }
@@ -356,4 +356,66 @@ func PinTopicHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
     http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func EditTopicHandler(w http.ResponseWriter, r *http.Request) {
+	user, _ := GetLoggedUser(r)
+	if user.ID == 0 {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	// Récupération de l'ID 
+	topicID := r.URL.Query().Get("id")
+	if topicID == "" {
+		topicID = r.FormValue("topic_id")
+	}
+
+	// On récupère l'auteur original du topic
+	var t models.Topic
+	err := database.DB.QueryRow("SELECT id, title, content, category, author_id FROM topics WHERE id = ?", topicID).Scan(
+		&t.ID, &t.Title, &t.Content, &t.Category, &t.AuthorID,
+	)
+	if err != nil {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	// Vérification critique des droits (Propriétaire ou admin)
+	if user.ID != t.AuthorID && user.Role != "admin" {
+		http.Error(w, "Action non autorisée : Vous n'êtes pas l'auteur de ce sujet.", http.StatusForbidden)
+		return
+	}
+
+	// On envoie vers un formulaire de modification
+	if r.Method == http.MethodGet {
+		data := map[string]interface{}{
+			"Topic":         t,
+			"CurrentUserID": user.ID,
+            "USer":          user,
+		}
+		RenderTemplate(w, r, "edit_topic.html", data)
+		return
+	}
+
+	// On valide les modifications du formulaire
+	if r.Method == http.MethodPost {
+		title := r.FormValue("title")
+		content := r.FormValue("content")
+		category := r.FormValue("category")
+
+		if title == "" || content == "" {
+			http.Error(w, "Le titre et le contenu ne peuvent pas être vides.", http.StatusBadRequest)
+			return
+		}
+
+		_, err = database.DB.Exec("UPDATE topics SET title = ?, content = ?, category = ? WHERE id = ?", title, content, category, topicID)
+		if err != nil {
+			http.Error(w, "Erreur lors de la mise à jour en BDD", 500)
+			return
+		}
+
+		http.Redirect(w, r, "/topic/view?id="+topicID, http.StatusSeeOther)
+		return
+	}
 }
