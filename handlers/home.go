@@ -61,7 +61,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	queryStr := `
 		SELECT 
 			t.id, t.title, t.content, t.created_at, t.status, 
-			t.is_pinned, t.image_url, t.category, u.username, u.id,
+			t.image_url, t.category, u.username, u.id,
 			(SELECT COUNT(*) FROM user_pins WHERE user_id = ? AND topic_id = t.id) AS is_pinned_by_user
 		FROM topics t
 		JOIN users u ON t.author_id = u.id `
@@ -69,12 +69,12 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	var rows *sql.Rows
 	if categoryFilter != "" {
 		queryStr += `WHERE t.category = ? AND (t.status != 'archivé' OR t.author_id = ?) 
-					 ORDER BY t.is_pinned DESC, t.created_at DESC 
+					 ORDER BY is_pinned_by_user DESC, t.created_at DESC 
 					 LIMIT ? OFFSET ?`
 		rows, err = database.DB.Query(queryStr, currentUserID, categoryFilter, currentUserID, pageSize, offset)
 	} else {
 		queryStr += `WHERE t.status != 'archivé' OR t.author_id = ? 
-					 ORDER BY t.is_pinned DESC, t.created_at DESC 
+					 ORDER BY is_pinned_by_user DESC, t.created_at DESC 
 					 LIMIT ? OFFSET ?`
 		rows, err = database.DB.Query(queryStr, currentUserID, currentUserID, pageSize, offset)
 	}
@@ -94,8 +94,8 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 		err := rows.Scan(
 			&t.ID, &t.Title, &t.Content, &rawDate, &t.Status,
-			&t.IsPinnedByUser, &imageURL, &t.Category, &t.Author, &t.AuthorID,
-			&pinnedCount, 
+			&imageURL, &t.Category, &t.Author, &t.AuthorID,
+			&pinnedCount,
 		)
 		if err != nil {
 			fmt.Println("Erreur scan topic:", err)
