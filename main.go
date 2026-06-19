@@ -5,6 +5,7 @@ import (
 	"forum/database"
 	"forum/handlers"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -47,7 +48,11 @@ func main() {
 	// --- HOME ---
 	http.HandleFunc("/", handlers.HomeHandler)
 
-
-	fmt.Println("[!] Serveur démarré sur http://localhost:8080/register")
-	http.ListenAndServe(":8080", nil)
+	// --- Port OS pour forum ---
+	port := os.Getenv("PORT")
+	if port == "" {
+    	port = "8080"
+	}
+	fmt.Println("[!] Serveur démarré sur le port " + port)
+	http.ListenAndServe(":"+port, nil)
 }
