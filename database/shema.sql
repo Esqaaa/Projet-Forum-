@@ -1,8 +1,6 @@
 CREATE DATABASE IF NOT EXISTS forum_project;
 USE forum_project;
 
--- Fichier SQL pour la mission FT-3 - Création d'un topic
-
 -- Création de la table "topics"
 CREATE TABLE IF NOT EXISTS topics (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -35,9 +33,6 @@ CREATE TABLE users (
     is_banned BOOLEAN DEFAULT 0
 );
 
-
--- Fichier SQL pour la mission FT-4 - Consulter le topic
-
 -- Création de la table "messages"
 CREATE TABLE IF NOT EXISTS messages (
     id int AUTO_INCREMENT PRIMARY KEY,
@@ -49,7 +44,7 @@ CREATE TABLE IF NOT EXISTS messages (
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Likes des messages
+-- Création de la table "message_likes"
 CREATE TABLE IF NOT EXISTS message_likes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     message_id INT NOT NULL,
@@ -62,7 +57,7 @@ CREATE TABLE IF NOT EXISTS message_likes (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Dislikes des messages
+-- Création de la table "message_dislikes"
 CREATE TABLE IF NOT EXISTS message_dislikes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     message_id INT NOT NULL,
@@ -75,6 +70,9 @@ CREATE TABLE IF NOT EXISTS message_dislikes (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-ALTER TABLE users ADD COLUMN biography TEXT DEFAULT '';
-ALTER TABLE users ADD COLUMN avatar_url VARCHAR(255) DEFAULT '/static/uploads/default-avatar.png';
-ALTER TABLE users ADD COLUMN last_login DATETIME DEFAULT CURRENT_TIMESTAMP;
+-- Création de la table "user_pins"
+CREATE TABLE user_pins (
+    user_id INT,
+    topic_id INT,
+    PRIMARY KEY (user_id, topic_id)
+);

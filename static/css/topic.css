@@ -1,3 +1,5 @@
+/* Style page topic */
+
 .topic-link {
     text-decoration: none;
     color: inherit;
@@ -32,7 +34,6 @@
     color: #bc84ee;
 }
 
-/* --- FT-8 : Alignement de la section commentaires --- */
 .comments-header-container {
     display: flex; 
     justify-content: space-between; 
@@ -53,7 +54,6 @@
     font-size: 0.85rem;
 }
 
-/* --- Style du Menu Déroulant Glassmorphism --- */
 .custom-select-forum {
     background: rgba(255, 255, 255, 0.07); 
     border: 1px solid rgba(255, 255, 255, 0.1); 
@@ -78,9 +78,8 @@
     border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Fix pour l'arrière-plan du menu déroulé (XAMPP/Chrome) */
 .custom-select-forum option {
-    background-color: #1a1c2e; /* Couleur sombre qui match avec ton fond */
+    background-color: #1a1c2e; 
     color: #fff;
     padding: 10px;
 }

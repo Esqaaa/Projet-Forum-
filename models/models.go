@@ -3,18 +3,18 @@ package models
 import "time"
 
 type Topic struct {
-	ID        int    // ID unique du topic
-	Title     string // Titre du topic
-	Content   string // Contenu du topic
-	Tags      string // Tags du topic
-	CreatedAt string // Date de création du topic
-	Date      string // Date formatée pour l'affichage HTML
-	AuthorID  int    // ID de l'auteur du topic
-	Author    string // Nom de l'auteur du topic
-	IsPinned  bool   // Si un post est épinglé
-	Category  string // Le thème du topic
-	ImageURL  string // Ajouter une image au post
-	Status    string // Statut du topic (ex: "Ouvert", "Fermé", "Archivé")
+	ID        int    	// ID unique du topic
+	Title     string 	// Titre du topic
+	Content   string 	// Contenu du topic
+	Tags      string	 // Tags du topic
+	CreatedAt string 	// Date de création du topic
+	Date      string 	// Date formatée pour l'affichage HTML
+	AuthorID  int    	// ID de l'auteur du topic
+	Author    string 	// Nom de l'auteur du topic
+	IsPinnedByUser bool	// Si le topic est épinglé par le user 
+	Category  string 	// Le thème du topic
+	ImageURL  string 	// Ajouter une image au post
+	Status    string 	// Statut du topic (ex: "Ouvert", "Fermé", "Archivé")
 }
 
 type Message struct {

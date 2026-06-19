@@ -1,4 +1,4 @@
--- Likes des messages
+-- Création de la table "message_likes"
 CREATE TABLE IF NOT EXISTS message_likes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     message_id INT NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS message_likes (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Dislikes des messages
+-- Création de la table "message_dislikes"
 CREATE TABLE IF NOT EXISTS message_dislikes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     message_id INT NOT NULL,
@@ -23,3 +23,4 @@ CREATE TABLE IF NOT EXISTS message_dislikes (
     FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+

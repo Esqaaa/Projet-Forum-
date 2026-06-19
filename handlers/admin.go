@@ -6,6 +6,7 @@ import (
     "net/http"
 )
 
+// Les accès admin sur un dashboard séparé  
 func AdminDashboard(w http.ResponseWriter, r *http.Request) {
     user, err := GetLoggedUser(r)
     if err != nil || user.Role != "admin" {
@@ -13,7 +14,6 @@ func AdminDashboard(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // Récupération des topics
     rows, _ := database.DB.Query(`
         SELECT id, title, author_id
         FROM topics
@@ -27,7 +27,6 @@ func AdminDashboard(w http.ResponseWriter, r *http.Request) {
         topics = append(topics, t)
     }
 
-    // Récupération des utilisateurs
     userRows, _ := database.DB.Query(`
         SELECT id, username, email, role
         FROM users
@@ -47,6 +46,7 @@ func AdminDashboard(w http.ResponseWriter, r *http.Request) {
     })
 }
 
+// La fonction de bannissement des users 
 func AdminBanUser(w http.ResponseWriter, r *http.Request) {
     user, err := GetLoggedUser(r)
     if err != nil || user.Role != "admin" {

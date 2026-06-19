@@ -1,5 +1,3 @@
--- Fichier SQL pour la mission FT-4 - Consulter le topic
-
 -- Création de la table "messages"
 CREATE TABLE IF NOT EXISTS messages (
     id int AUTO_INCREMENT PRIMARY KEY,

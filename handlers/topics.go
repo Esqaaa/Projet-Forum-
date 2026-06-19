@@ -130,7 +130,7 @@ func ViewTopicHandler(w http.ResponseWriter, r *http.Request) {
         &t.Title,
         &t.Content,
         &t.Status,
-        &t.IsPinned,
+        &t.IsPinnedByUser,
         &rawDate,
         &t.Category,
         &t.Author,
@@ -372,13 +372,29 @@ func PinTopicHandler(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    _, err := database.DB.Exec("UPDATE topics SET is_pinned = NOT is_pinned WHERE id = ?", topicID)
+    // Vérifier si l'utilisateur a déjà épinglé ce topic
+    var exists bool
+    err := database.DB.QueryRow("SELECT EXISTS(SELECT 1 FROM user_pins WHERE user_id = ? AND topic_id = ?)", userID, topicID).Scan(&exists)
     if err != nil {
-        fmt.Println("Erreur lors de l'UPDATE is_pinned:", err)
-        http.Error(w, "Erreur lors de l'épinglage", 500)
+        http.Error(w, "Erreur BDD", 500)
         return
     }
-    http.Redirect(w, r, "/", http.StatusSeeOther)
+
+    if exists {
+        // Si déjà épinglé, on le retire des favoris
+        _, err = database.DB.Exec("DELETE FROM user_pins WHERE user_id = ? AND topic_id = ?", userID, topicID)
+    } else {
+        // Sinon, on l'ajoute
+        _, err = database.DB.Exec("INSERT INTO user_pins (user_id, topic_id) VALUES (?, ?)", userID, topicID)
+    }
+
+    if err != nil {
+        http.Error(w, "Erreur lors de la modification du favori", 500)
+        return
+    }
+    
+    // Rediriger vers la page précédente ou l'accueil
+    http.Redirect(w, r, r.Header.Get("Referer"), http.StatusSeeOther)
 }
 
 type EditTopicData struct {

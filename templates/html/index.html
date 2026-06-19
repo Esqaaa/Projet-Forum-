@@ -6,7 +6,6 @@
 
 <div class="container">
 
-    <!-- BANDEAU AU-DESSUS -->
     <div class="top-user-bar">
 
         <div class="tub-left">
@@ -31,81 +30,68 @@
 
     </div>
 
-    <!-- TITRE -->
     <div class="topics-title-bar">
-
         <h1>Derniers Topics</h1>
         
-        <form action="/search" method="GET" style="display: grid; grid-template-columns: 1fr auto; gap: 8px; flex-grow: 1; max-width: 450px; margin: 0; min-width: 200px;">
-            <div style="position: relative; width: 100%;">
-                <input type="text" name="q" placeholder="Rechercher un sujet..." required 
-                    style="width: 100%; padding: 10px 12px 10px 35px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: white; font-family: inherit; font-size: 0.9rem; box-sizing: border-box; height: 38px;">
-                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.4; font-size: 0.85rem;"></i>
-                
+        <form action="/search" method="GET" class="search-wrapper">
+            <div class="search-input-wrapper">
+                <input type="text" name="q" placeholder="Rechercher un sujet..." required class="search-input">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+
                 {{if .SelectedCategory}}
                     <input type="hidden" name="category" value="{{.SelectedCategory}}">
                 {{end}}
             </div>
-            <button type="submit" class="btn-main" style="margin-top: 0; padding: 0 20px; border-radius: 6px; font-size: 0.85rem; height: 38px; white-space: nowrap;">
-                Rechercher
-            </button>
+            <button type="submit" class="btn-main">Rechercher</button>
         </form>
 
-        <div style="display: flex; align-items: center; gap: 10px; white-space: nowrap;">
-            <a href="/topic/create" class="btn-main" style="margin: 0; height: 38px; display: inline-flex; align-items: center; box-sizing: border-box;">Créer un sujet</a>
+        <div>
+            <a href="/topic/create" class="btn-main">Créer un sujet</a>
         </div>
     </div>
 
     
-    <div style="display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
-        <a href="/" style="text-decoration: none; font-size: 0.85rem; padding: 6px 12px; border-radius: 20px; border: 1px solid #bc84ee; {{if eq .SelectedCategory ""}}background: #bc84ee; color: black; font-weight: bold;{{else}}color: #bc84ee;{{end}}">
+    <div class="category-bar">
+        <a href="/" class="category-pill category-pill-all {{if eq .SelectedCategory ""}}active{{end}}">
             Tout voir
         </a>
+
         {{range .Categories}}
-        <a href="/?category={{.}}" style="text-decoration: none; font-size: 0.85rem; padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); {{if eq $.SelectedCategory .}}background: white; color: black; font-weight: bold; border-color: white;{{else}}color: white; opacity: 0.8;{{end}}">
+        <a href="/?category={{.}}" 
+           class="category-pill category-pill-item {{if eq $.SelectedCategory .}}active{{end}}">
             {{.}}
         </a>
         {{end}}
     </div>
 
-
-    <!-- LISTE DES TOPICS -->
     <div class="topics-list">
-
         {{range .Topics}}
         <div style="position: relative;">
 
-            <!-- BOUTON ÉPINGLER -->
             <a href="/topic/pin?id={{.ID}}" 
-               class="pin-btn {{if .IsPinned}}pinned{{end}}" 
+               class="pin-btn {{if .IsPinnedByUser}}pinned{{end}}" 
                title="Épingler le sujet">
                 <i class="fa-solid fa-thumbtack"></i>
             </a>
 
-            <!-- LIEN VERS LE TOPIC -->
             <a href="/topic/view?id={{.ID}}" class="topic-link">
-                <div class="topic-card" style="{{if .IsPinned}}border-left: 4px solid #bc84ee;{{end}}">
+                <div class="topic-card {{if .IsPinnedByUser}}pinned{{end}}">
 
-                    <!-- TITRE -->
-                    <h3 style="margin-bottom: 10px; padding-left: 20px; color:
-                        {{if or (eq .Status "fermé") (eq .Status "Fermé")}}#ff4a4a
-                        {{else if .IsPinned}}#FFA800
-                        {{else}}#bc84ee{{end}};">
+                    <h3 class="topic-title
+                        {{if or (eq .Status "fermé") (eq .Status "Fermé")}}closed
+                        {{else if .IsPinnedByUser}}pinned
+                        {{else}}default{{end}}">
                         
                         {{if or (eq .Status "fermé") (eq .Status "Fermé")}}
-                            <i class="fa-solid fa-lock" style="font-size: 0.95rem; margin-right: 5px;"></i>
+                            <i class="fa-solid fa-lock"></i>
                         {{end}}
 
                         {{.Title}}
-
-                        
                     </h3>
 
-                    <!-- CONTENU -->
-                    <p style="margin-bottom: 15px;">{{.Content}}</p>
+                    <p>{{.Content}}</p>
 
-                    <!-- META -->
-                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; opacity: 0.6;">
+                    <div class="topic-meta">
                         <div>Par <strong>{{.Author}}</strong></div>
                         <div>{{.CreatedAt}}</div>
                     </div>
@@ -123,30 +109,28 @@
     </div>
 
     {{if gt .TotalPages 1}}
-    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 40px; font-size: 0.9rem;">
+    <div class="pagination">
 
         {{if .HasPrev}}
-        <a href="/?page={{.PrevPage}}" 
-           style="color: #6384ff; text-decoration: none; padding: 8px 16px; border: 1px solid rgba(99, 132, 255, 0.3); border-radius: 5px; background: rgba(99, 132, 255, 0.05);">
+        <a href="/?page={{.PrevPage}}" class="pagination-btn">
             <i class="fa-solid fa-chevron-left"></i> Précédent
         </a>
         {{else}}
-        <span style="opacity: 0.3; padding: 8px 16px; border: 1px solid rgba(255,255,255,0.05); border-radius: 5px;">
+        <span class="pagination-btn disabled">
             <i class="fa-solid fa-chevron-left"></i> Précédent
         </span>
         {{end}}
 
-        <span style="opacity: 0.7;">
+        <span>
             Page <strong>{{.CurrentPage}}</strong> sur <strong>{{.TotalPages}}</strong>
         </span>
 
         {{if .HasNext}}
-        <a href="/?page={{.NextPage}}" 
-           style="color: #6384ff; text-decoration: none; padding: 8px 16px; border: 1px solid rgba(99, 132, 255, 0.3); border-radius: 5px; background: rgba(99, 132, 255, 0.05);">
+        <a href="/?page={{.NextPage}}" class="pagination-btn">
             Suivant <i class="fa-solid fa-chevron-right"></i>
         </a>
         {{else}}
-        <span style="opacity: 0.3; padding: 8px 16px; border: 1px solid rgba(255,255,255,0.05); border-radius: 5px;">
+        <span class="pagination-btn disabled">
             Suivant <i class="fa-solid fa-chevron-right"></i>
         </span>
         {{end}}
