@@ -4,7 +4,8 @@ import (
     "database/sql"
     "log"
     "os"
-    _ "github.com/go-sql-driver/mysql"
+
+    _ "github.com/lib/pq"
 )
 
 var DB *sql.DB
@@ -12,12 +13,12 @@ var DB *sql.DB
 func InitDB() {
     var err error
 
-    dsn := os.Getenv("DSN")
+    dsn := os.Getenv("DB_DSN")
     if dsn == "" {
-        dsn = "root:@tcp(127.0.0.1:3306)/forum_project" // fallback local
+        log.Fatal("DB_DSN manquant dans les variables d'environnement")
     }
 
-    DB, err = sql.Open("mysql", dsn)
+    DB, err = sql.Open("postgres", dsn)
     if err != nil {
         log.Fatal("Erreur connexion DB:", err)
     }
@@ -30,5 +31,5 @@ func InitDB() {
     DB.SetMaxOpenConns(10)
     DB.SetMaxIdleConns(5)
 
-    log.Println("[!] Connecté à MySQL")
+    log.Println("[!] Connecté à PostgreSQL")
 }
